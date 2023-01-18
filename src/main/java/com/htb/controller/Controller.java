@@ -17,13 +17,12 @@ public class Controller {
 
 	@Autowired
 	CustomerDao customerDao;
-	@Autowired 
+	@Autowired
 	BookingDao bookingDao;
-	
+
 //	add New Customer mobile_number & pin_number
 	@PostMapping(value = "addNewCustomer", consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.APPLICATION_XML_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-					MediaType.APPLICATION_XML_VALUE })
+			MediaType.APPLICATION_XML_VALUE })
 	public boolean addNewCustomer(@RequestBody Customer customer) throws Exception {
 		System.out.println("addNewCustomer API Started");
 		if (customerInputValidation(customer.getMobileNumber(), customer.getPin())) {
@@ -35,8 +34,7 @@ public class Controller {
 
 //	check Exist Customer (mobile_number & pin_number)
 	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.APPLICATION_XML_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-					MediaType.APPLICATION_XML_VALUE })
+			MediaType.APPLICATION_XML_VALUE })
 //	@ResponseBody
 	public Customer customerLogin(@RequestBody Customer customer) throws Exception {
 		System.out.println("customerLogin API Started");
@@ -48,24 +46,6 @@ public class Controller {
 		}
 	}
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
 //	
 //	// get booking details by id
 //		@GetMapping(value = "getBooking")
@@ -98,25 +78,7 @@ public class Controller {
 //		}
 //	
 //	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
+
 	private boolean customerInputValidation(long mobile_number, int pin_number) {
 		return mobileNumberValidation(mobile_number) && pinNumberValidation(pin_number) ? true : false;
 	}
