@@ -17,29 +17,40 @@ public class CustomerDao {
 	ConnectionPooling cp;
 
 	public boolean addNewCustomer(long mobile_number, int pin_number) {
-		String query = "INSERT INTO HOTEL_CUSTOMER(mobile_number,pin_number) VALUES (?,?)";
-		try (PreparedStatement ps = cp.getConnection().prepareStatement(query)) {
-			ps.setLong(1, mobile_number);
-			ps.setInt(2, pin_number);
-			return ps.execute();
-		} catch (SQLException e) {
-			System.out.println("SQL Exception - " + e.getLocalizedMessage());
+		if (getCustomer(mobile_number) == null) {
+			String query = "INSERT INTO HOTEL_CUSTOMER(mobile_number,pin_number) VALUES (?,?)";
+			try (PreparedStatement ps = cp.getConnection().prepareStatement(query)) {
+				ps.setLong(1, mobile_number);
+				ps.setInt(2, pin_number);
+				ps.execute();
+				System.out.println("New Customer Added - Success");
+				return true;
+			} catch (SQLException e) {
+				System.out.println("SQL Exception - " + e.getLocalizedMessage());
+			}
+			return false;
+		} else {
+			System.out.println("Existing Customer");
+			return false;
 		}
-		return false;
 	}
 
-	public boolean customerLogin(long mobile_number, int pin_number) {
+	public Customer customerLogin(long mobile_number, int pin_number) {
 		Customer customer = getCustomer(mobile_number);
 		if (customer == null) {
-			return false;
+//			return false;
 		} else if (customer.getPin() == pin_number) {
-			return true;
+			return customer;
 		} else {
 			System.out.println("Wrong Pin Number");
-			return false;
+//			return false;
 		}
+		return null;
 	}
 
+	
+	
+	
 	public Customer getCustomer(long mobile_number) {
 		String query = "SELECT * FROM HOTEL_CUSTOMER WHERE mobile_number = ? ;";
 		try (PreparedStatement ps = cp.getConnection().prepareStatement(query)) {
@@ -54,7 +65,7 @@ public class CustomerDao {
 				return null;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQL Exception - " + e.getLocalizedMessage());
+			System.out.println("SQL Exception - " + e.getMessage());
 			return null;
 		}
 	}

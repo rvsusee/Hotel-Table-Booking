@@ -7,6 +7,7 @@ public class Customer {
 	private int pin;
 	private String emailId;
 
+
 	public Customer(int id, String name, long mobileNumber, int pin, String emailId) {
 		this.id = id;
 		this.name = name;
