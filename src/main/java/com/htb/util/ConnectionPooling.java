@@ -45,8 +45,12 @@ public class ConnectionPooling {
 			return conn;
 		} catch (SQLException e) {
 			System.out.println("Exception Occured : " + e.getMessage());
+			return null;
 		}
-		return null;
+		
+		
+		
+		
 	}
 
 }

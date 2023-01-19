@@ -5,9 +5,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 
 import com.htb.domain.Customer;
+import com.htb.domain.Response;
 import com.htb.util.ConnectionPooling;
 
 @Repository
@@ -16,43 +18,47 @@ public class CustomerDao {
 	@Autowired
 	ConnectionPooling cp;
 
-	public boolean addNewCustomer(long mobile_number, int pin_number) {
-		if (getCustomer(mobile_number) == null) {
-			String query = "INSERT INTO HOTEL_CUSTOMER(mobile_number,pin_number) VALUES (?,?)";
-			try (PreparedStatement ps = cp.getConnection().prepareStatement(query)) {
+	public Response addNewCustomer(long mobile_number, int pin_number) {
+		try {
+			Customer customer = getCustomer(mobile_number);
+			if (customer == null) {
+				String query = "INSERT INTO HOTEL_CUSTOMER(mobile_number,pin_number) VALUES (?,?)";
+				PreparedStatement ps = cp.getConnection().prepareStatement(query);
 				ps.setLong(1, mobile_number);
 				ps.setInt(2, pin_number);
 				ps.execute();
 				System.out.println("New Customer Added - Success");
-				return true;
-			} catch (SQLException e) {
-				System.out.println("SQL Exception - " + e.getLocalizedMessage());
+				return new Response("Customer Details Added Successfully", HttpStatus.OK, customer);
+			} else {
+				System.out.println("Existing Customer");
+				return new Response("Existing Customer", HttpStatus.NOT_ACCEPTABLE);
 			}
-			return false;
-		} else {
-			System.out.println("Existing Customer");
-			return false;
+		} catch (SQLException e) {
+			System.out.println("SQL Exception - " + e.getLocalizedMessage());
+			return new Response("Exception Occured" + e, HttpStatus.BAD_REQUEST);
 		}
 	}
 
-	public Customer customerLogin(long mobile_number, int pin_number) {
-		Customer customer = getCustomer(mobile_number);
+	public Response customerLogin(long mobile_number, int pin_number) {
+		Customer customer = null;
+		try {
+			customer = getCustomer(mobile_number);
+		} catch (SQLException e) {
+			return new Response("SQL Exception Occured", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 		if (customer == null) {
-//			return false;
+			return new Response("User Not Found", HttpStatus.NOT_FOUND, null);
 		} else if (customer.getPin() == pin_number) {
-			return customer;
+			return new Response("Login Success", HttpStatus.ACCEPTED, customer);
 		} else {
 			System.out.println("Wrong Pin Number");
-//			return false;
+			return new Response("User Entered Wrong Pin Number", HttpStatus.BAD_REQUEST, null);
 		}
-		return null;
 	}
 
-	
-	
-	
-	public Customer getCustomer(long mobile_number) {
+	public Customer getCustomer(long mobile_number) throws SQLException {
 		String query = "SELECT * FROM HOTEL_CUSTOMER WHERE mobile_number = ? ;";
+
 		try (PreparedStatement ps = cp.getConnection().prepareStatement(query)) {
 			ps.setLong(1, mobile_number);
 			ResultSet rs = ps.executeQuery();
@@ -64,9 +70,6 @@ public class CustomerDao {
 				System.out.println("Customer Details Not Found");
 				return null;
 			}
-		} catch (SQLException e) {
-			System.out.println("SQL Exception - " + e.getMessage());
-			return null;
 		}
 	}
 
