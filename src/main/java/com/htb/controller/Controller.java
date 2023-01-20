@@ -1,6 +1,12 @@
 package com.htb.controller;
 
+import java.sql.SQLException;
+import java.util.Iterator;
+import java.util.List;
+
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,17 +26,57 @@ public class Controller {
 //	check Exist Customer (mobile_number & pin_number)
 	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody Response customerLogin(@RequestBody Customer customer) throws Exception {
-		System.out.println("customerLogin API ");
-		String inputValidation = mobileNumberValidation(customer.getMobileNumber());
-		if (inputValidation.equals("success")) {
+	public @ResponseBody Response customerLogin(@RequestBody Customer customerInput) {
+		Response response = new Response();
+		try {
 
-			return customerDao.customerLogin(customer);
-		} else {
-			return new Response("OK", inputValidation);
+			if (Long.toString(customerInput.getMobileNumber()).length() != 10) {
+				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
+				response.setMessage("Please Enter 10 digit Mobile number");
+				return response;
+			} else {
+				List<Customer> customerList = customerDao.customerLogin(customerInput);
+				if (customerList.size() == 0) {
+					response.setHttpStatus(HttpStatus.NO_CONTENT.toString());
+					response.setMessage("Customer Not Found");
+					return response;
+				} else {
+					for (int i = 0; i < customerList.size(); i++) {
+						if (customerList.get(i).getPin().equals(customerInput.getPin())) {
+							response.setHttpStatus(HttpStatus.ACCEPTED.toString());
+							response.setMessage("Login Success");
+							response.setObject(new JSONObject(customerInput));
+							return response;
+						}
+					}
+					response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
+					response.setMessage("Pin Number Wrong");
+					return response;
+				}
+			}
+		} catch (Exception e) {
+			response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase());
+			response.setMessage("Exception" + e.getLocalizedMessage());
+			return response;
+
 		}
 	}
 
+	
+	
+	
+	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
 //	
 //	
 //	
@@ -61,21 +107,13 @@ public class Controller {
 //	add New Customer mobile_number & pin_number
 //	@PostMapping(value = "addNewCustomer", consumes = { MediaType.APPLICATION_JSON_VALUE, }, produces = {
 //			MediaType.APPLICATION_JSON_VALUE })
-//	public @ResponseBody JSONObject addNewCustomer(@RequestBody Customer customer) {
+//	public @ResponseBody Response addNewCustomer(@RequestBody Customer customer) {
 //		System.out.println("addNewCustomer API");
-//
-//		JSONObject response = new JSONObject();
-//
-////		Response response = new Response();
-//
-//		response.setMessage(mobileNumberValidation(customer.getMobileNumber()));
-//
-//		if (response.getMessage().equals("success")) {
-//			response = customerDao.addNewCustomer(customer.getMobileNumber(), customer.getPin());
-//			return response;
+//		String inputValidation = mobileNumberValidation(customer.getMobileNumber());
+//		if (inputValidation.equals("success")) {
+//			return customerDao.addNewCustomer(customer);
 //		} else {
-//			response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-//			return response;
+//			return new Response("OK", inputValidation);
 //		}
 //	}
 
@@ -112,15 +150,6 @@ public class Controller {
 //	
 //	
 
-	private String mobileNumberValidation(long mobile_number) {
-		if (Long.toString(mobile_number).length() == 10) {
-			System.out.println("Validation - Mobile Number - Success");
-			return "success";
-		} else {
-			System.out.println("Validation - Mobile Number - Failed");
-			return "Please Enter 10 digit Mobile number";
-		}
-	}
 }
 
 // get booking details by id
