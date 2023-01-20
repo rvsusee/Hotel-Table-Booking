@@ -1,16 +1,12 @@
 package com.htb.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.htb.dao.BookingDao;
 import com.htb.dao.CustomerDao;
 import com.htb.domain.Customer;
 import com.htb.domain.Response;
@@ -20,45 +16,68 @@ public class Controller {
 
 	@Autowired
 	CustomerDao customerDao;
-	@Autowired
-	BookingDao bookingDao;
-
-//	add New Customer mobile_number & pin_number
-	@PostMapping(value = "addNewCustomer", consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.APPLICATION_XML_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-					MediaType.APPLICATION_XML_VALUE })
-	public @ResponseBody Response addNewCustomer(@RequestBody Customer customer) {
-		System.out.println("addNewCustomer API");
-		Response response = new Response();
-
-		response.setMessage(customerInputValidation(customer.getMobileNumber(), customer.getPin()));
-
-		if (response.getMessage().equals("success")) {
-			response = customerDao.addNewCustomer(customer.getMobileNumber(), customer.getPin());
-			return response;
-		} else {
-			response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-			return response;
-		}
-	}
 
 //	check Exist Customer (mobile_number & pin_number)
-	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE,
-			MediaType.APPLICATION_XML_VALUE }, produces = { MediaType.APPLICATION_JSON_VALUE,
-					MediaType.APPLICATION_XML_VALUE })
+	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
+			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response customerLogin(@RequestBody Customer customer) throws Exception {
 		System.out.println("customerLogin API ");
-		Response response = new Response();
-		response.setMessage(customerInputValidation(customer.getMobileNumber(), customer.getPin()));
+		String inputValidation = mobileNumberValidation(customer.getMobileNumber());
+		if (inputValidation.equals("success")) {
 
-		if (response.getMessage().equals("success")) {
-			response = customerDao.customerLogin(customer.getMobileNumber(), customer.getPin());
-			return response;
+			return customerDao.customerLogin(customer);
 		} else {
-			response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-			return response;
+			return new Response("OK", inputValidation);
 		}
 	}
+
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+
+//	add New Customer mobile_number & pin_number
+//	@PostMapping(value = "addNewCustomer", consumes = { MediaType.APPLICATION_JSON_VALUE, }, produces = {
+//			MediaType.APPLICATION_JSON_VALUE })
+//	public @ResponseBody JSONObject addNewCustomer(@RequestBody Customer customer) {
+//		System.out.println("addNewCustomer API");
+//
+//		JSONObject response = new JSONObject();
+//
+////		Response response = new Response();
+//
+//		response.setMessage(mobileNumberValidation(customer.getMobileNumber()));
+//
+//		if (response.getMessage().equals("success")) {
+//			response = customerDao.addNewCustomer(customer.getMobileNumber(), customer.getPin());
+//			return response;
+//		} else {
+//			response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
+//			return response;
+//		}
+//	}
 
 //	
 //	// get booking details by id
@@ -93,24 +112,8 @@ public class Controller {
 //	
 //	
 
-	private String customerInputValidation(long mobile_number, int pin_number) {
-		String mobileNumberValidation = mobileNumberValidation(mobile_number);
-		String pinNumberValidation = pinNumberValidation(pin_number);
-		String validationResult = "";
-		if (!mobileNumberValidation.equals("success")) {
-			validationResult = mobileNumberValidation;
-		}
-		if (!pinNumberValidation.equals("success")) {
-			validationResult += pinNumberValidation;
-		}
-		if (mobileNumberValidation.equals("success") && pinNumberValidation.equals("success")) {
-			return "success";
-		}
-		return validationResult;
-	}
-
 	private String mobileNumberValidation(long mobile_number) {
-		if (mobile_number > 999999999 && mobile_number < new Long("10000000000")) {
+		if (Long.toString(mobile_number).length() == 10) {
 			System.out.println("Validation - Mobile Number - Success");
 			return "success";
 		} else {
@@ -118,16 +121,7 @@ public class Controller {
 			return "Please Enter 10 digit Mobile number";
 		}
 	}
-
-	private String pinNumberValidation(int pin_number) {
-		if (pin_number > 999 && pin_number < 10000) {
-			System.out.println("Validation - Pin Number - Success");
-			return "success";
-		} else {
-			System.out.println("Validation - Pin Number - Failed");
-			return "Please Enter 4 digit Pin number";
-		}
-	}
+}
 
 // get booking details by id
 //	@GetMapping(value = "getBooking")
@@ -158,4 +152,3 @@ public class Controller {
 //	public String editBooking() throws Exception {
 //		return "";
 //	}
-}

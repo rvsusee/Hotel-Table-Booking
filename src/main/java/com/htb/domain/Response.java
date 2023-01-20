@@ -1,25 +1,33 @@
 package com.htb.domain;
 
-import org.springframework.http.HttpStatus;
+import org.json.JSONObject;
 
 public class Response {
 
+	private String httpStatus;
 	private String message;
-	private HttpStatus httpStatus;
-	private Object object;
+	private String object;
 
 	public Response() {
 	}
 
-	public Response(String message, HttpStatus httpStatus) {
-		this.message = message;
+	public Response(String httpStatus, String message) {
 		this.httpStatus = httpStatus;
+		this.message = message;
 	}
 
-	public Response(String message, HttpStatus httpStatus, Object object) {
-		this.message = message;
+	public Response(String httpStatus, String message, String object) {
 		this.httpStatus = httpStatus;
+		this.message = message;
 		this.object = object;
+	}
+
+	public String getHttpStatus() {
+		return httpStatus;
+	}
+
+	public void setHttpStatus(String httpStatus) {
+		this.httpStatus = httpStatus;
 	}
 
 	public String getMessage() {
@@ -30,20 +38,12 @@ public class Response {
 		this.message = message;
 	}
 
-	public HttpStatus getHttpStatus() {
-		return httpStatus;
-	}
-
-	public void setHttpStatus(HttpStatus httpStatus) {
-		this.httpStatus = httpStatus;
-	}
-
-	public Object getObject() {
+	public String getObject() {
 		return object;
 	}
 
-	public void setObject(Object object) {
-		this.object = object;
+	public void setObject(JSONObject jsonObject) {
+		this.object = jsonObject.toString();
 	}
 
 }
