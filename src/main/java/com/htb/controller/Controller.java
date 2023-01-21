@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.htb.dao.CustomerDao;
+import com.htb.domain.BookingDetails;
 import com.htb.domain.Customer;
 import com.htb.domain.Response;
 
@@ -21,6 +22,8 @@ public class Controller {
 
 	@Autowired
 	CustomerDao customerDao;
+
+	@Autowired
 
 	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
@@ -108,11 +111,25 @@ public class Controller {
 //			return bookingDao.getBookingById(inputs);
 //		}
 //
-////		get last booking details
-//		@GetMapping(value = "getLastBooking")
-//		public String getLastBooking(@RequestParam(value = "mobile_number") String mobile_number) throws Exception {
-//			return bookingDao.getLastBooking(mobile_number);
-//		}
+
+//		get last booking details
+	@GetMapping(value = "getLastBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Response getLastBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+		Response response = new Response();
+
+		Customer customer = bookingDetails.getCustomer();
+
+		if (customer == null || customer.getId() == 0) {
+			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+			response.setMessage("Please Login");
+			return response;
+		} else {
+			
+			return response;
+		}
+
+	}
+
 //
 ////		delete booking by Id
 //		@GetMapping(value = "cancelBooking")
