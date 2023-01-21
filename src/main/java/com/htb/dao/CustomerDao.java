@@ -21,9 +21,9 @@ public class CustomerDao {
 	public List<Customer> customerLogin(Customer customer) {
 		String query = "SELECT * FROM HOTEL_CUSTOMER WHERE mobile_number = ? ;";
 		try {
-			PreparedStatement ps = connectionPooling.getConnection().prepareStatement(query);
-			ps.setLong(1, customer.getMobileNumber());
-			ResultSet rs = ps.executeQuery();
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setLong(1, customer.getMobileNumber());
+			ResultSet rs = preparedStatement.executeQuery();
 			List<Customer> customerList = new ArrayList<>();
 			while (rs.next()) {
 				customerList.add(new Customer(rs.getInt("id"), rs.getString("name"), rs.getLong("mobile_number"),
@@ -36,24 +36,22 @@ public class CustomerDao {
 		}
 	}
 
-//
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
-//	
+	public boolean addNewCustomer(Customer customer) {
+		try {
+			String query = "INSERT INTO HOTEL_CUSTOMER(mobile_number,pin_number) VALUES (?,?)";
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setLong(1, customer.getMobileNumber());
+			preparedStatement.setString(2, customer.getPin());
+			if (preparedStatement.executeUpdate() > 0) {
+				return true;
+			} else {
+				return false;
+			}
+		} catch (SQLException e) {
+			System.out.println("SQLException" + e.getLocalizedMessage());
+			return false;
+		}
+	}
 
 //	public Response addNewCustomer(Customer customer) {
 //		String query = "SELECT * FROM HOTEL_CUSTOMER WHERE mobile_number = ? ;";

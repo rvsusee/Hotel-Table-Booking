@@ -6,7 +6,7 @@ public class Response {
 
 	private String httpStatus;
 	private String message;
-	private String object;
+	private String responseBody;
 
 	public Response() {
 	}
@@ -16,10 +16,10 @@ public class Response {
 		this.message = message;
 	}
 
-	public Response(String httpStatus, String message, String object) {
+	public Response(String httpStatus, String message, String responseBody) {
 		this.httpStatus = httpStatus;
 		this.message = message;
-		this.object = object;
+		this.responseBody = responseBody;
 	}
 
 	public String getHttpStatus() {
@@ -38,12 +38,12 @@ public class Response {
 		this.message = message;
 	}
 
-	public String getObject() {
-		return object;
+	public String getResponseBody() {
+		return responseBody;
 	}
 
-	public void setObject(JSONObject jsonObject) {
-		this.object = jsonObject.toString();
+	public void setResponseBody(JSONObject responseBody) {
+		this.responseBody = responseBody.toString();
 	}
 
 }

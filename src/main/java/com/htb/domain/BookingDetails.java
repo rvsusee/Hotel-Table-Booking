@@ -12,8 +12,6 @@ public class BookingDetails {
 	private TableDetails allocatedTable;
 	private Date bookingOn;
 
-	
-
 	public BookingDetails(int id, Customer customer, int personCount, Date dateTime, TableDetails allocatedTable,
 			Date bookingOn) {
 		this.id = id;
@@ -77,6 +75,5 @@ public class BookingDetails {
 		return "BookingDetails [id=" + id + ", customer=" + customer + ", personCount=" + personCount + ", dateTime="
 				+ dateTime + ", allocatedTable=" + allocatedTable + ", bookingOn=" + bookingOn + "]";
 	}
-	
 
 }
