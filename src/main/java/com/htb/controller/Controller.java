@@ -101,6 +101,12 @@ public class Controller {
 		}
 	}
 
+//	
+//	// get booking details by id
+//		@GetMapping(value = "getBooking")
+//		public String getBookingById(@RequestParam Map<String, String> inputs) throws Exception {
+//			return bookingDao.getBookingById(inputs);
+//		}
 //
 ////		get last booking details
 //		@GetMapping(value = "getLastBooking")
