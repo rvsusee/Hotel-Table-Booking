@@ -1,14 +1,14 @@
 package com.htb.domain;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class BranchDetails {
 	private int id;
 	private String name;
 	private String address;
-	ArrayList<TableDetails> tablesList;
+	List<TableDetails> tablesList;
 
-	public BranchDetails(int id, String name, String address, ArrayList<TableDetails> tablesList) {
+	public BranchDetails(int id, String name, String address, List<TableDetails> tablesList) {
 		this.id = id;
 		this.name = name;
 		this.address = address;
@@ -39,11 +39,12 @@ public class BranchDetails {
 		this.address = address;
 	}
 
-	public ArrayList<TableDetails> getTablesList() {
+	public List<TableDetails> getTablesList() {
 		return tablesList;
 	}
 
-	public void setTablesList(ArrayList<TableDetails> tablesList) {
+	public void setTablesList(List<TableDetails> tablesList) {
 		this.tablesList = tablesList;
 	}
+
 }

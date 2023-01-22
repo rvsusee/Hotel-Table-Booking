@@ -21,7 +21,7 @@ public class ConnectionPooling {
 	@Value("${spring.datasource.driverClassName}")
 	private String DRIVER;
 
-	public BasicDataSource getDataSource() {
+	private BasicDataSource getDataSource() {
 		if (dataSource != null) {
 			return dataSource;
 		} else {
@@ -47,10 +47,5 @@ public class ConnectionPooling {
 			System.out.println("Exception Occured : " + e.getMessage());
 			return null;
 		}
-		
-		
-		
-		
 	}
-
 }

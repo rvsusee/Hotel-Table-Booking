@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.htb.dao.BookingDao;
 import com.htb.dao.CustomerDao;
 import com.htb.domain.BookingDetails;
 import com.htb.domain.Customer;
@@ -24,6 +25,7 @@ public class Controller {
 	CustomerDao customerDao;
 
 	@Autowired
+	BookingDao bookingDao;
 
 	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
@@ -37,21 +39,27 @@ public class Controller {
 				return response;
 			} else {
 				List<Customer> customerList = customerDao.customerLogin(customerInput);
-				if (customerList.size() == 0) {
-					response.setHttpStatus(HttpStatus.NO_CONTENT.toString());
-					response.setMessage("Customer Not Found");
-					return response;
-				} else {
-					for (int i = 0; i < customerList.size(); i++) {
-						if (customerList.get(i).getPin().equals(customerInput.getPin())) {
-							response.setHttpStatus(HttpStatus.ACCEPTED.toString());
-							response.setResponseBody(new JSONObject(customerList.get(i)));
-							response.setMessage("Login Success");
-							return response;
+				if (customerList == null) {
+					if (customerList.size() == 0) {
+						response.setHttpStatus(HttpStatus.NO_CONTENT.toString());
+						response.setMessage("Customer Not Found");
+						return response;
+					} else {
+						for (int i = 0; i < customerList.size(); i++) {
+							if (customerList.get(i).getPin().equals(customerInput.getPin())) {
+								response.setHttpStatus(HttpStatus.ACCEPTED.toString());
+								response.setResponseBody(new JSONObject(customerList.get(i)));
+								response.setMessage("Login Success");
+								return response;
+							}
 						}
+						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
+						response.setMessage("Pin Number Wrong");
+						return response;
 					}
-					response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
-					response.setMessage("Pin Number Wrong");
+				} else {
+					response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase());
+					response.setMessage("Something Wrong");
 					return response;
 				}
 			}
@@ -64,7 +72,6 @@ public class Controller {
 		}
 	}
 
-//	add New Customer mobile_number & pin_number
 	@PostMapping(value = "addNewCustomer", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response addNewCustomer(@RequestBody Customer customerInput) {
@@ -78,20 +85,26 @@ public class Controller {
 			} else {
 //				check if the customer is exist or not
 				List<Customer> customerList = customerDao.customerLogin(customerInput);
-				if (customerList.size() == 0) {
-					boolean customer = customerDao.addNewCustomer(customerInput);
-					if (customer == false) {
-						response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-						response.setMessage("Unable to Create Account");
-						return response;
+				if (customerList == null) {
+					if (customerList.size() == 0) {
+						boolean customer = customerDao.addNewCustomer(customerInput);
+						if (customer == false) {
+							response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+							response.setMessage("Unable to Create Account");
+							return response;
+						} else {
+							response.setHttpStatus(HttpStatus.ACCEPTED.toString());
+							response.setMessage("Successfully Created");
+							return response;
+						}
 					} else {
-						response.setHttpStatus(HttpStatus.ACCEPTED.toString());
-						response.setMessage("Successfully Created");
+						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
+						response.setMessage("Existing Customer");
 						return response;
 					}
 				} else {
-					response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
-					response.setMessage("Existing Customer");
+					response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE.getReasonPhrase());
+					response.setMessage("Something Wrong");
 					return response;
 				}
 			}
@@ -100,7 +113,6 @@ public class Controller {
 			System.out.println("Exception" + e.getLocalizedMessage());
 			response.setMessage("Something Wrong");
 			return response;
-
 		}
 	}
 
@@ -114,29 +126,60 @@ public class Controller {
 
 //		get last booking details
 	@GetMapping(value = "getLastBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response getLastBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+	public Response getLastBooking(@RequestBody Customer customer) throws Exception {
 		Response response = new Response();
-
-		Customer customer = bookingDetails.getCustomer();
 
 		if (customer == null || customer.getId() == 0) {
 			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
 			response.setMessage("Please Login");
 			return response;
 		} else {
-			
-			return response;
+			List<BookingDetails> bookingDetails = bookingDao.getLastBookingID(customer);
+			if (bookingDetails == null) {
+				if (bookingDetails.size() > 0) {
+					response.setHttpStatus(HttpStatus.FOUND.toString());
+					response.setMessage("Last Booking Details Found");
+					response.setResponseBody(new JSONObject(bookingDetails));
+					return response;
+
+				} else {
+					response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
+					response.setMessage("Booking Details Not Found");
+					return response;
+				}
+			} else {
+				response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE.toString());
+				response.setMessage("Something Wrong");
+				return response;
+			}
 		}
 
 	}
 
-//
-////		delete booking by Id
-//		@GetMapping(value = "cancelBooking")
-//		public String deleteBookingById(@RequestParam Map<String, String> inputs) {
-//			return bookingDao.deleteBookingById(inputs);
-//		}
-//
+	
+	
+//		Cancel booking by Id
+	@  GetMapping(value = "cancelBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Response deleteBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+		Response response = new Response();
+
+		if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
+			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+			response.setMessage("Please Login");
+			return response;
+		} else {
+			if (bookingDao.deleteBookingById(bookingDetails)) {
+				response.setHttpStatus(HttpStatus.ACCEPTED.toString());
+				response.setMessage("Booking Cancel Successfully");
+				return response;
+			} else {
+				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
+				response.setMessage("Unable to Cancel Booking");
+				return response;
+			}
+		}
+	}
+
 //	// add new Booking 
 //		@PostMapping(value = "addBooking")
 //		public String addBooking(@RequestParam Map<String, String> inputs) throws Exception {
@@ -153,23 +196,7 @@ public class Controller {
 
 }
 
-// get booking details by id
-//	@GetMapping(value = "getBooking")
-//	public String getBookingById(@RequestParam Map<String, String> inputs) throws Exception {
-//		return bookingDao.getBookingById(inputs);
-//	}
-//
-////	get last booking details
-//	@GetMapping(value = "getLastBooking")
-//	public String getLastBooking(@RequestParam(value = "mobile_number") String mobile_number) throws Exception {
-//		return bookingDao.getLastBooking(mobile_number);
-//	}
-//
-////	delete booking by Id
-//	@GetMapping(value = "cancelBooking")
-//	public String deleteBookingById(@RequestParam Map<String, String> inputs) {
-//		return bookingDao.deleteBookingById(inputs);
-//	}
+
 //
 //// add new Booking 
 //	@PostMapping(value = "addBooking")

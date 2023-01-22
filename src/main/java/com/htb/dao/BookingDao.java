@@ -23,22 +23,31 @@ public class BookingDao {
 	ConnectionPooling connectionPooling;
 
 //	add booking details In progress 
-//	public boolean addBooking(BookingDetails bookingDetails) {
-//		try {
-//			String date_time = inputs.get("date_time");
-//			Timestamp date_timeSql = new DateTimeValidation().convertSqlDate(date_time);
-//			String query = "exec HOTEL_ADD_BOOKING @customer_id = " + customer.getId() + ", @person_count= "
-//					+ person_count + ", @date_time = '" + date_timeSql + "', @table_id= 100;";
-//
-//			boolean bk = bkDao.addBooking(query, customer);
-//			if (bk == false) {
-//				return "Booking Details Not Found";
-//			} else {
-//				return "Booking Added Successfully";
-//			}
-//		} catch (Exception e) {
-//		}
-//	}
+	public boolean addBooking(BookingDetails bookingDetails) {
+		try {
+
+			String query = "exec HOTEL_ADD_BOOKING @customer_id = ? , @person_count= ?, @date_time = ?, @table_id= ?;";
+
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setInt(1, bookingDetails.getCustomer().getId());
+			preparedStatement.setInt(2, bookingDetails.getPersonCount());
+			preparedStatement.setDate(3, bookingDetails.getDateTime());
+			preparedStatement.setInt(4, bookingDetails.getAllocatedTable().getTableId());
+
+			String date_time = inputs.get("date_time");
+			Timestamp date_timeSql = new DateTimeValidation().convertSqlDate(date_time);
+			String query = "exec HOTEL_ADD_BOOKING @customer_id = " + customer.getId() + ", @person_count= "
+					+ person_count + ", @date_time = '" + date_timeSql + "', @table_id= 100;";
+
+			boolean bk = bkDao.addBooking(query, customer);
+			if (bk == false) {
+				return "Booking Details Not Found";
+			} else {
+				return "Booking Added Successfully";
+			}
+		} catch (Exception e) {
+		}
+	}
 
 //	public BookingDetails getBookingById(String query, Customer customer) {
 //		ResultSet resultSet;
@@ -60,89 +69,93 @@ public class BookingDao {
 //// INCOMPLETE
 //	}
 
-//	public boolean deleteBookingById(String query) {
-//		try {
-//			int delete = connectionPooling.getConnection().createStatement().executeUpdate(query);
-//			if (delete != 0)
-//				return true;
-//			else
-//				return false;
-//		} catch (SQLException e) {
-//			System.out.println("Exception Occured in AddNewCustomer(CustomerDao) - " + e.toString());
-//			return false;
-//		}
-//	}
+	public boolean deleteBookingById(BookingDetails bookingDetails) {
+		try {
+//			use join query and stored procedure
+
+			String query = "DELETE FROM HOTEL_BOOKING_DETAILS where id = ? and customer_id = ? ;";
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setInt(1, bookingDetails.getId());
+			preparedStatement.setInt(1, bookingDetails.getCustomer().getId());
+			if (preparedStatement.executeUpdate() > 0) {
+				return true;
+			} else {
+				return false;
+			}
+
+		} catch (Exception e) {
+			System.out.println("Exception : " + e.getLocalizedMessage());
+			return false;
+		}
+
+	}
 
 //	get bookingDetails
-	public List<BookingDetails> getLastBookingID(BookingDetails bookingDetails) {
+	public List<BookingDetails> getLastBookingID(Customer customer) {
 		try {
-
-			if()
-			
+//			use join query and stored procedure
 			String query = "SELECT TOP 1 * FROM HOTEL_BOOKING_DETAILS where customer_id = ? ORDER BY id DESC;";
-			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query)
-					preparedStatement.setInt(1, bookingDetails.getCustomer().getId());
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setInt(1, customer.getId());
 			ResultSet resultSet = preparedStatement.executeQuery();
 			List<BookingDetails> bookings = null;
 			while (resultSet.next()) {
-
-				bookings.add(new BookingDetails(resultSet.getInt("id"), bookingDetails.getCustomer(), resultSet.getInt("person_count"), null, null, null))
+				BookingDetails bookingDetails = new BookingDetails();
+				bookingDetails.setId(resultSet.getInt("id"));
+				bookingDetails.setCustomer(customer);
+				bookingDetails.setPersonCount(resultSet.getInt("person_count"));
+				bookingDetails.setDateTime(resultSet.getDate("date_time"));
+				bookingDetails.setBookingOn(resultSet.getDate("booking_on"));
+				bookingDetails.setAllocatedTable(
+						new TableDetails(resultSet.getInt("table_id"), resultSet.getInt("table_size")));
+				bookings.add(bookingDetails);
 			}
+			return bookings;
 		} catch (Exception e) {
-
+			System.out.println("Exception : " + e.getLocalizedMessage());
+			return null;
 		}
 
-		return null;
 	}
 
-	// get table details using table Id
-//	public TableDetails getTableDetailsById(int id) {
-//		String query = "SELECT * FROM HOTEL_TABLE where id = " + id + ";";
-//		ResultSet rs;
-//		try {
-//			rs = cp.getConnection().createStatement().executeQuery(query);
-//			if (rs.next())
-//				return new TableDetails(rs.getInt("id"), rs.getInt("size"));
-//			else
-//				System.out.println("No Data Found");
-//		} catch (SQLException e) {
-//			System.out.println("SQL Exception Occured in GetCustomerDetailsByMobileNumber Method " + e.toString());
-//		}
-//		return null;
-//	}
-
-//	get branch Details using branch Id
-//	public BranchDetails getBranchDetailsById(int id) {
-//		String query = "SELECT * FROM HOTEL_BRANCH where id = " + id + ";";
-//		ResultSet rs;
-//		try {
-//			rs = cp.getConnection().createStatement().executeQuery(query);
-//			if (rs.next())
-//				return new BranchDetails(rs.getInt("id"), rs.getString("name"), rs.getString("address"),
-//						new ArrayList<>());
-//			else
-//				System.out.println("No Data Found");
-//		} catch (SQLException e) {
-//			System.out.println("SQL Exception Occured in GetCustomerDetailsByMobileNumber Method " + e.toString());
-//		}
-//		return null;
-//	}
+//	get Branch Details using Brach Id
+	public BranchDetails getBranchDetailsById(int branch_id) {
+		try {
+			String query = "SELECT * FROM HOTEL_BRANCH where id = ? ;";
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if (!resultSet.next()) {
+				return null;
+			} else {
+				List<TableDetails> tablesDetails = getTableDetails(resultSet.getInt("id"));
+				if (tablesDetails == null || tablesDetails.size() == 0) {
+					return null;
+				} else {
+					return new BranchDetails(resultSet.getInt("id"), resultSet.getString("name"),
+							resultSet.getString("address"), tablesDetails);
+				}
+			}
+		} catch (Exception e) {
+			System.out.println("Exception: " + e.toString());
+			return null;
+		}
+	}
 
 //	get table Details using Brach Id
-//	public ArrayList<TableDetails> tableDetails(int branch_id) {
-//		String query = "SELECT * FROM HOTEL_BRANCH where id = " + branch_id + ";";
-//		ResultSet rs;
-//		try {
-//			rs = cp.getConnection().createStatement().executeQuery(query);
-//			ArrayList<TableDetails> tableDetails = null;
-//			while (rs.next()) {
-//				tableDetails.add(new TableDetails(rs.getInt("id"), rs.getInt("size")));
-//			}
-//			return tableDetails;
-//		} catch (SQLException e) {
-//			System.out.println("SQL Exception Occured in GetCustomerDetailsByMobileNumber Method " + e.toString());
-//		}
-//		return null;
-//	}
+	public ArrayList<TableDetails> getTableDetails(int branch_id) {
+		try {
+			String query = "SELECT * FROM HOTEL_BRANCH where id = ? ;";
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			ArrayList<TableDetails> tableDetails = null;
+			while (resultSet.next()) {
+				tableDetails.add(new TableDetails(resultSet.getInt("id"), resultSet.getInt("size")));
+			}
+			return tableDetails;
+		} catch (Exception e) {
+			System.out.println("Exception: " + e.toString());
+			return null;
+		}
+	}
 
 }
