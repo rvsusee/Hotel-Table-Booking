@@ -1,9 +1,12 @@
 package com.htb.dao;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,57 +25,50 @@ public class BookingDao {
 	@Autowired
 	ConnectionPooling connectionPooling;
 
-//	add booking details In progress 
+//	add booking details In progress
 	public boolean addBooking(BookingDetails bookingDetails) {
 		try {
-
 			String query = "exec HOTEL_ADD_BOOKING @customer_id = ? , @person_count= ?, @date_time = ?, @table_id= ?;";
-
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setInt(1, bookingDetails.getCustomer().getId());
 			preparedStatement.setInt(2, bookingDetails.getPersonCount());
-			preparedStatement.setDate(3, bookingDetails.getDateTime());
+			preparedStatement.setTimestamp(3, new Timestamp(bookingDetails.getDateTime().getTime()));
 			preparedStatement.setInt(4, bookingDetails.getAllocatedTable().getTableId());
 
-			String date_time = inputs.get("date_time");
-			Timestamp date_timeSql = new DateTimeValidation().convertSqlDate(date_time);
-			String query = "exec HOTEL_ADD_BOOKING @customer_id = " + customer.getId() + ", @person_count= "
-					+ person_count + ", @date_time = '" + date_timeSql + "', @table_id= 100;";
-
-			boolean bk = bkDao.addBooking(query, customer);
-			if (bk == false) {
-				return "Booking Details Not Found";
+			if (preparedStatement.executeUpdate() > 0) {
+				return true;
 			} else {
-				return "Booking Added Successfully";
+				return false;
 			}
 		} catch (Exception e) {
+			System.out.println(e.getLocalizedMessage());
+			return false;
 		}
 	}
 
-//	public BookingDetails getBookingById(String query, Customer customer) {
-//		ResultSet resultSet;
+	public TableDetails checkAvailabilityTable(java.util.Date bookingDateTime) {
+
+		
+		
+		return null;
+	}
+
+//	public java.sql.Timestamp convertSqlDate(String strDate) {
+//		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
+//		Date date = null;
 //		try {
-//			resultSet = connectionPooling.getConnection().createStatement().executeQuery(query);
-//			if (resultSet.next())
-//				return new BookingDetails(resultSet.getInt("id"), customer, resultSet.getInt("person_count"),
-//						resultSet.getDate("date_time"), getTableDetailsById(resultSet.getInt("table_id")),
-//						resultSet.getDate("booking_on"));
-//			else
-//				System.out.println("BookingDetails Not Found");
-//		} catch (SQLException e) {
-//			System.out.println("Exception Occured in fetchBookingById : " + e.toString());
+//			date = (Date) sdf.parse(strDate);
+//		} catch (ParseException e) {
+//			System.out.println(e.getLocalizedMessage());
 //		}
-//		return null;
+//		long millis = date.getTime();
+//		java.sql.Timestamp ts = new Timestamp(millis);
+//		return ts;
 //	}
 
-//	public void updateBookingById(BookingDetails bk, int bkId) {
-//// INCOMPLETE
-//	}
-
-	public boolean deleteBookingById(BookingDetails bookingDetails) {
+//	Cancel booking by booking Id 
+	public boolean cancelBookingById(BookingDetails bookingDetails) {
 		try {
-//			use join query and stored procedure
-
 			String query = "DELETE FROM HOTEL_BOOKING_DETAILS where id = ? and customer_id = ? ;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setInt(1, bookingDetails.getId());
@@ -82,7 +78,6 @@ public class BookingDao {
 			} else {
 				return false;
 			}
-
 		} catch (Exception e) {
 			System.out.println("Exception : " + e.getLocalizedMessage());
 			return false;
@@ -90,13 +85,14 @@ public class BookingDao {
 
 	}
 
-//	get bookingDetails
-	public List<BookingDetails> getLastBookingID(Customer customer) {
+//	get last booking Details using customer id
+	public List<BookingDetails> getLastBookingID(Customer customer, int lastNoOfTransaction) {
 		try {
 //			use join query and stored procedure
-			String query = "SELECT TOP 1 * FROM HOTEL_BOOKING_DETAILS where customer_id = ? ORDER BY id DESC;";
+			String query = "SELECT TOP ? * FROM HOTEL_BOOKING_DETAILS where customer_id = ? ORDER BY id DESC;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
-			preparedStatement.setInt(1, customer.getId());
+			preparedStatement.setInt(1, lastNoOfTransaction);
+			preparedStatement.setInt(2, customer.getId());
 			ResultSet resultSet = preparedStatement.executeQuery();
 			List<BookingDetails> bookings = null;
 			while (resultSet.next()) {
@@ -118,6 +114,41 @@ public class BookingDao {
 
 	}
 
+//	get booking details by Booking id In progress
+	public BookingDetails getBookingById(BookingDetails bookingDetails) {
+		try {
+//			use join query and stored procedure
+			String query = "SELECT  * FROM HOTEL_BOOKING_DETAILS where id = ? and customer_id = ?;";
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setInt(1, bookingDetails.getId());
+			preparedStatement.setInt(2, bookingDetails.getCustomer().getId());
+			ResultSet resultSet = preparedStatement.executeQuery();
+			if (resultSet.next()) {
+				bookingDetails.setId(resultSet.getInt("id"));
+				bookingDetails.setCustomer(bookingDetails.getCustomer());
+				bookingDetails.setPersonCount(resultSet.getInt("person_count"));
+				bookingDetails.setDateTime(resultSet.getDate("date_time"));
+				bookingDetails.setBookingOn(resultSet.getDate("booking_on"));
+				bookingDetails.setAllocatedTable(
+						new TableDetails(resultSet.getInt("table_id"), resultSet.getInt("table_size")));
+				return bookingDetails;
+			} else {
+				return null;
+			}
+		} catch (Exception e) {
+			System.out.println("Exception : " + e.getLocalizedMessage());
+			return null;
+		}
+	}
+
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
 //	get Branch Details using Brach Id
 	public BranchDetails getBranchDetailsById(int branch_id) {
 		try {

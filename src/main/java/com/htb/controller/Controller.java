@@ -134,7 +134,7 @@ public class Controller {
 			response.setMessage("Please Login");
 			return response;
 		} else {
-			List<BookingDetails> bookingDetails = bookingDao.getLastBookingID(customer);
+			List<BookingDetails> bookingDetails = bookingDao.getLastBookingID(customer, 1);
 			if (bookingDetails == null) {
 				if (bookingDetails.size() > 0) {
 					response.setHttpStatus(HttpStatus.FOUND.toString());
@@ -156,10 +156,8 @@ public class Controller {
 
 	}
 
-	
-	
 //		Cancel booking by Id
-	@  GetMapping(value = "cancelBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "cancelBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public Response deleteBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
 
@@ -168,7 +166,7 @@ public class Controller {
 			response.setMessage("Please Login");
 			return response;
 		} else {
-			if (bookingDao.deleteBookingById(bookingDetails)) {
+			if (bookingDao.cancelBookingById(bookingDetails)) {
 				response.setHttpStatus(HttpStatus.ACCEPTED.toString());
 				response.setMessage("Booking Cancel Successfully");
 				return response;
@@ -195,17 +193,3 @@ public class Controller {
 //	
 
 }
-
-
-//
-//// add new Booking 
-//	@PostMapping(value = "addBooking")
-//	public String addBooking(@RequestParam Map<String, String> inputs) throws Exception {
-//		System.out.println("AddBooking Started");
-//		return bookingDao.addBooking(inputs);
-//	}
-//
-////	edit booking Incomplete
-//	public String editBooking() throws Exception {
-//		return "";
-//	}
