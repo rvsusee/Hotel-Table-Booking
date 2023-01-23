@@ -21,7 +21,7 @@ import com.htb.domain.Customer;
 import com.htb.domain.Response;
 
 @RestController
-@RequestMapping("/customer/")
+@RequestMapping("/customer")
 public class CustomerController {
 
 	@Autowired
@@ -32,7 +32,7 @@ public class CustomerController {
 
 	Logger logger = LogManager.getLogger("Customer Controller");
 
-	@GetMapping(value = "login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
+	@GetMapping(value = "/login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response customerLogin(@RequestBody Customer customerInput) {
 		Response response = new Response();
@@ -64,7 +64,7 @@ public class CustomerController {
 							}
 						}
 						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-						logger.info("Pin Number Wrong");
+						logger.warn("Pin Number Wrong");
 						response.setMessage("Pin Number Wrong");
 						return response;
 					}
@@ -88,7 +88,7 @@ public class CustomerController {
 		}
 	}
 
-	@PostMapping(value = "register", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
+	@PostMapping(value = "/register", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response newCustomer(@RequestBody Customer customerInput) {
 		logger.info("register API");
@@ -107,7 +107,7 @@ public class CustomerController {
 						logger.info("Customer details is Not Exist");
 						boolean customer = customerDao.addNewCustomer(customerInput);
 						if (customer == false) {
-							logger.info("Unable to create customer");
+							logger.warn("Unable to create customer");
 							response.setHttpStatus(HttpStatus.BAD_REQUEST);
 							response.setMessage("Account Creation Failed");
 							return response;
@@ -118,7 +118,7 @@ public class CustomerController {
 							return response;
 						}
 					} else {
-						logger.info("Existing Customer");
+						logger.error("Existing Customer");
 						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
 						response.setMessage("Existing Customer");
 						return response;

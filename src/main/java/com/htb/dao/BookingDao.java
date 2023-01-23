@@ -40,7 +40,7 @@ public class BookingDao {
 				logger.info("booking Success");
 				return getLastBookingByCustomerID(bookingDetails.getCustomer()).get(0);
 			} else {
-				logger.info("Booking Failed");
+				logger.error("Booking Failed");
 				return null;
 			}
 		} catch (SQLException e) {
@@ -66,7 +66,7 @@ public class BookingDao {
 				logger.info("booking updated successfully");
 				return true;
 			} else {
-				logger.info("booking updation failed");
+				logger.error("booking updation failed");
 				return false;
 			}
 		} catch (SQLException e) {
@@ -90,7 +90,7 @@ public class BookingDao {
 				logger.info("Booking Cancelled Successfully");
 				return true;
 			} else {
-				logger.info("Booking Cancellation Failed");
+				logger.error("Booking Cancellation Failed");
 				return false;
 			}
 		} catch (SQLException e) {

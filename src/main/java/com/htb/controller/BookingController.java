@@ -22,7 +22,7 @@ import com.htb.domain.Customer;
 import com.htb.domain.Response;
 
 @RestController
-@RequestMapping("/booking/")
+@RequestMapping("/booking")
 public class BookingController {
 
 	@Autowired
@@ -31,7 +31,7 @@ public class BookingController {
 	Logger logger = LogManager.getLogger("Booking Controller");
 
 //	get booking by Id
-	@GetMapping(value = "getBookingDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/getBookingDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response getBookingDetailsById(@RequestBody BookingDetails bookingDetails) throws Exception {
 		logger.info("getBookingDetailsByID API");
 
@@ -72,7 +72,7 @@ public class BookingController {
 	}
 
 //	get last booking by customer details
-	@GetMapping(value = "getLastBookingByCustomerID", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@GetMapping(value = "/getLastBookingByCustomerID", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response getLastBookingByCustomerID(@RequestBody Customer customer) throws Exception {
 		logger.info("Get Last Booking Details API");
 		Response response = new Response();
@@ -110,7 +110,7 @@ public class BookingController {
 		}
 	}
 
-	@DeleteMapping(value = "cancelBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@DeleteMapping(value = "/cancelBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response cancelBookingById(@RequestBody BookingDetails bookingDetails) throws Exception {
 		logger.info("cancelBookingById API");
 		Response response = new Response();
@@ -149,7 +149,7 @@ public class BookingController {
 		}
 	}
 
-	@PostMapping(value = "newBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/newBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response newBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
 		logger.info("newBooking API");
 		Response response = new Response();
@@ -183,7 +183,7 @@ public class BookingController {
 		}
 	}
 
-	@PostMapping(value = "updateBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@PostMapping(value = "/updateBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response updateBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
 

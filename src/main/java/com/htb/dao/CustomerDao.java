@@ -53,7 +53,7 @@ public class CustomerDao {
 				logger.info("data inserted successfully");
 				return true;
 			} else {
-				logger.info("data insertion failed");
+				logger.error("data insertion failed");
 				return false;
 			}
 		} catch (SQLException e) {
