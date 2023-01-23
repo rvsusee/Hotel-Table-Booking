@@ -2,32 +2,23 @@ package com.htb.domain;
 
 public class TableDetails {
 
-
-	private int tableId;
-	private int tableSize;
-
-	public TableDetails(int tableId, int tableSize) {
-		this.tableId = tableId;
-		this.tableSize = tableSize;
+	private int id;
+	private int size;
+public TableDetails(int id, int size) {
+		this.id = id;
+		this.size = size;
+	}
+	public int getId() {
+		return id;
+	}
+	public void setId(int id) {
+		this.id = id;
+	}
+	public int getSize() {
+		return size;
+	}
+	public void setSize(int size) {
+		this.size = size;
 	}
 
-	public int getTableId() {
-		return tableId;
-	}
-
-	public void setTableId(int tableId) {
-		this.tableId = tableId;
-	}
-
-	public int getTableSize() {
-		return tableSize;
-	}
-
-	public void setTableSize(int tableSize) {
-		this.tableSize = tableSize;
-	}
-	@Override
-	public String toString() {
-		return "TableDetails [tableId=" + tableId + ", tableSize=" + tableSize + "]";
-	}
 }

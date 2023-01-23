@@ -116,17 +116,10 @@ public class Controller {
 		}
 	}
 
-//	
-//	// get booking details by id
-//		@GetMapping(value = "getBooking")
-//		public String getBookingById(@RequestParam Map<String, String> inputs) throws Exception {
-//			return bookingDao.getBookingById(inputs);
-//		}
-//
 
 //	get booking by Id
 	@GetMapping(value = "getBkDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response getBookingDetailsByID(@RequestBody BookingDetails bookingDetails) throws Exception {
+	public @ResponseBody Response getBookingDetailsByID(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
 		if (bookingDetails == null || bookingDetails.getId() == 0) {
 			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
@@ -153,7 +146,7 @@ public class Controller {
 
 //	get last booking by customer details
 	@GetMapping(value = "getLastBk", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response getLastBooking(@RequestBody Customer customer) throws Exception {
+	public @ResponseBody Response getLastBooking(@RequestBody Customer customer) throws Exception {
 		System.out.println("Get Last Booking Details API");
 		Response response = new Response();
 
@@ -181,9 +174,8 @@ public class Controller {
 		}
 	}
 
-//		Cancel booking by Id
-	@DeleteMapping(value = "cancelBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response deleteBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+	@DeleteMapping(value = "cancelBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Response deleteBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
 		if (bookingDetails == null) {
 			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
@@ -208,9 +200,8 @@ public class Controller {
 		}
 	}
 
-//	get booking by Id
-	@GetMapping(value = "newBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response newBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+	@PostMapping(value = "newBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public @ResponseBody Response newBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
 		if (bookingDetails == null) {
 			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
@@ -223,34 +214,15 @@ public class Controller {
 		} else {
 			bookingDetails = bookingDao.newBooking(bookingDetails);
 			if (bookingDetails != null) {
-				response.setHttpStatus(HttpStatus.FOUND.toString());
+				response.setHttpStatus(HttpStatus.ACCEPTED.toString());
 				response.setMessage("Booking Successfully");
 				response.setResponseBody(new JSONObject(bookingDetails));
 				return response;
-			} else if (bookingDetails == null) {
+			} else {
 				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
 				response.setMessage("Unable to book");
-				return response;
-			} else {
-				response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-				response.setMessage("Something Wrong");
 				return response;
 			}
 		}
 	}
-
-//	// add new Booking 
-//		@PostMapping(value = "addBooking")
-//		public String addBooking(@RequestParam Map<String, String> inputs) throws Exception {
-//			System.out.println("AddBooking Started");
-//			return bookingDao.addBooking(inputs);
-//		}
-//
-////		edit booking Incomplete
-//		public String editBooking() throws Exception {
-//			return "";
-//		}
-//	
-//	
-
 }
