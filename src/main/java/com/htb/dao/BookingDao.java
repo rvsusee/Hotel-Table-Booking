@@ -37,7 +37,27 @@ public class BookingDao {
 				return null;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException - newBooking: "+e.getLocalizedMessage());
+			System.out.println("SQLException - newBooking: " + e.getLocalizedMessage());
+			return null;
+		}
+	}
+
+	public BookingDetails updateBooking(BookingDetails bookingDetails) {
+		try {
+			String query = "exec HOTEL_UPDATE_BOOKING @booking_id = ?, @customer_id = ?, @person_count= ?, @date_time = ?, @table_id= ?;";
+			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
+			preparedStatement.setInt(1, bookingDetails.getCustomer().getId());
+			preparedStatement.setInt(2, bookingDetails.getPersonCount());
+			preparedStatement.setTimestamp(3, new Timestamp(bookingDetails.getDateTime().getTime()));
+			preparedStatement.setInt(4, bookingDetails.getAllocatedTable().getId());
+			if (preparedStatement.executeUpdate() > 0) {
+				System.out.println("booking Confirmed");
+				return getLastBookingID(bookingDetails.getCustomer()).get(0);
+			} else {
+				return null;
+			}
+		} catch (SQLException e) {
+			System.out.println("SQLException - newBooking: " + e.getLocalizedMessage());
 			return null;
 		}
 	}
