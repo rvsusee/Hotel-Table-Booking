@@ -6,6 +6,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -18,7 +20,10 @@ public class CustomerDao {
 	@Autowired
 	ConnectionPooling connectionPooling;
 
+	Logger logger = LogManager.getLogger("Customer Dao");
+
 	public List<Customer> customerLogin(Customer customer) {
+		logger.info("customerLogin");
 		String query = "exec HOTEL_GET_CUSTOMER_BY_MOBILENUMBER @mobile_number = ?;";
 		try {
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
@@ -29,26 +34,30 @@ public class CustomerDao {
 				customerList.add(new Customer(rs.getInt("id"), rs.getString("name"), rs.getLong("mobile_number"),
 						rs.getString("pin_number"), rs.getString("email_id")));
 			}
+			logger.info("data retrieved Successfully");
 			return customerList;
 		} catch (SQLException e) {
-			System.out.println("SQLException" + e.getLocalizedMessage());
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
 			return null;
 		}
 	}
 
 	public boolean addNewCustomer(Customer customer) {
+		logger.info("addNewCustomer");
 		try {
 			String query = "exec HOTEL_ADD_NEW_CUSTOMER @mobile_number = ? @pin_number = ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setLong(1, customer.getMobileNumber());
 			preparedStatement.setString(2, customer.getPin());
 			if (preparedStatement.executeUpdate() > 0) {
+				logger.info("data inserted successfully");
 				return true;
 			} else {
+				logger.info("data insertion failed");
 				return false;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException" + e.getLocalizedMessage());
+			logger.info("SQLException" + e.getLocalizedMessage());
 			return false;
 		}
 	}

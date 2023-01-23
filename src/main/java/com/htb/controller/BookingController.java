@@ -2,6 +2,8 @@ package com.htb.controller;
 
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,142 +28,191 @@ public class BookingController {
 	@Autowired
 	BookingDao bookingDao;
 
+	Logger logger = LogManager.getLogger("Booking Controller");
+
 //	get booking by Id
 	@GetMapping(value = "getBookingDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response getBookingDetailsById(@RequestBody BookingDetails bookingDetails) throws Exception {
+		logger.info("getBookingDetailsByID API");
+
 		Response response = new Response();
-		if (bookingDetails == null || bookingDetails.getId() == 0) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Enter Booking Details");
-			return response;
-		} else if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Login");
-			return response;
-		} else {
-			bookingDetails = bookingDao.getBookingById(bookingDetails);
-			if (bookingDetails != null) {
-				response.setHttpStatus(HttpStatus.FOUND.toString());
-				response.setMessage("Booking Details Found");
-				response.setResponseBody(new JSONObject(bookingDetails));
+		try {
+			if (bookingDetails == null || bookingDetails.getId() == 0) {
+				logger.warn("Booking Details Validation Failed");
+				response.setHttpStatus(HttpStatus.BAD_REQUEST);
+				response.setMessage("Booking Details Vaildation Failed");
+				return response;
+			} else if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
+				logger.warn("Customer Login Failed");
+				response.setHttpStatus(HttpStatus.BAD_REQUEST);
+				response.setMessage("Login Failed");
 				return response;
 			} else {
-				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
-				response.setMessage("Booking Details Not Found");
-				return response;
+				logger.info("Booking Details Validation Success");
+				bookingDetails = bookingDao.getBookingById(bookingDetails);
+				if (bookingDetails != null) {
+					logger.info("Booking Details Found");
+					response.setHttpStatus(HttpStatus.FOUND);
+					response.setMessage("Booking Details Found");
+					response.setResponseBody(new JSONObject(bookingDetails));
+					return response;
+				} else {
+					logger.error("Booking Details Not Found");
+					response.setHttpStatus(HttpStatus.NOT_FOUND);
+					response.setMessage("Booking Details Not Found");
+					return response;
+				}
 			}
+		} catch (Exception e) {
+			logger.fatal("Exception Occured : " + e.getLocalizedMessage());
+			response.setHttpStatus(HttpStatus.NOT_FOUND);
+			response.setMessage("Exception Occured");
+			return response;
 		}
 	}
 
 //	get last booking by customer details
 	@GetMapping(value = "getLastBookingByCustomerID", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response getLastBookingByCustomerID(@RequestBody Customer customer) throws Exception {
-		System.out.println("Get Last Booking Details API");
+		logger.info("Get Last Booking Details API");
 		Response response = new Response();
-
-		if (customer == null || customer.getId() == 0) {
-			System.out.println("Custmer Details not Found");
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Login");
-			return response;
-		} else {
-			List<BookingDetails> bookingDetails = bookingDao.getLastBookingID(customer);
-			if (bookingDetails == null) {
-				response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-				response.setMessage("Booking Details Not Found");
-				return response;
-			} else if (bookingDetails.size() > 0) {
-				response.setHttpStatus(HttpStatus.FOUND.toString());
-				response.setMessage("Last Booking Details Found");
-				response.setResponseBody(new JSONObject(bookingDetails));
+		try {
+			if (customer == null || customer.getId() == 0) {
+				logger.warn("Custmer Details Validation Failed");
+				response.setHttpStatus(HttpStatus.BAD_REQUEST);
+				response.setMessage("Login Failed");
 				return response;
 			} else {
-				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
-				response.setMessage("Booking Details Not Found");
-				return response;
+				List<BookingDetails> bookingDetails = bookingDao.getLastBookingByCustomerID(customer);
+				if (bookingDetails == null) {
+					logger.info("Database Integration Failed");
+					response.setHttpStatus(HttpStatus.BAD_REQUEST);
+					response.setMessage("Database Integration Failed");
+					return response;
+				} else if (bookingDetails.size() > 0) {
+					logger.info("Booking Details Found");
+					response.setHttpStatus(HttpStatus.FOUND);
+					response.setMessage("Booking Details Found");
+					response.setResponseBody(new JSONObject(bookingDetails));
+					return response;
+				} else {
+					logger.info("Booking Details Not Found");
+					response.setHttpStatus(HttpStatus.NOT_FOUND);
+					response.setMessage("Booking Details Not Found");
+					return response;
+				}
 			}
+		} catch (Exception e) {
+			logger.fatal("Exception Occured : " + e.getLocalizedMessage());
+			response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE);
+			response.setMessage("Exception Occured");
+			return response;
 		}
 	}
 
 	@DeleteMapping(value = "cancelBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response cancelBookingById(@RequestBody BookingDetails bookingDetails) throws Exception {
+		logger.info("cancelBookingById API");
 		Response response = new Response();
-		if (bookingDetails == null) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Enter Booking Details");
-			return response;
-		} else {
-			if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
-				response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-				response.setMessage("Please Login");
+		try {
+			if (bookingDetails == null) {
+				logger.warn("Booking Details Validation Failed");
+				response.setHttpStatus(HttpStatus.BAD_REQUEST);
+				response.setMessage("Booking Details Validation Failed");
 				return response;
 			} else {
-				if (bookingDao.cancelBookingById(bookingDetails)) {
-					response.setHttpStatus(HttpStatus.ACCEPTED.toString());
-					response.setMessage("Booking Cancel Successfully");
+				if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
+					logger.info("Customer Login Failed");
+					response.setHttpStatus(HttpStatus.BAD_REQUEST);
+					response.setMessage("Login Failed");
 					return response;
 				} else {
-					response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
-					response.setMessage("Unable to Cancel Booking");
-					return response;
+					logger.info("Booking Details Validation Success");
+					if (bookingDao.cancelBookingById(bookingDetails)) {
+						logger.info("Booking Canceled Successfully");
+						response.setHttpStatus(HttpStatus.ACCEPTED);
+						response.setMessage("Booking Cancellation Successfully");
+						return response;
+					} else {
+						logger.info("Booking Cancellation Failed");
+						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
+						response.setMessage("Booking Cancellation Failed");
+						return response;
+					}
 				}
 			}
+		} catch (Exception e) {
+			logger.fatal("Exception Occured : " + e.getLocalizedMessage());
+			response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE);
+			response.setMessage("Exception Occured");
+			return response;
 		}
 	}
 
 	@PostMapping(value = "newBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response newBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+		logger.info("newBooking API");
 		Response response = new Response();
-		if (bookingDetails == null) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Enter Booking Details");
-			return response;
-		} else if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Login");
-			return response;
-		} else {
-			bookingDetails = bookingDao.newBooking(bookingDetails);
-			if (bookingDetails != null) {
-				response.setHttpStatus(HttpStatus.ACCEPTED.toString());
-				response.setMessage("Booking Successfully");
-				response.setResponseBody(new JSONObject(bookingDetails));
+		try {
+			if (bookingDetails == null || bookingDetails.getCustomer() == null
+					|| bookingDetails.getCustomer().getId() == 0) {
+				logger.warn("Booking Details Validation Failed");
+				response.setHttpStatus(HttpStatus.BAD_REQUEST);
+				response.setMessage("Booking Details Validation Failed");
 				return response;
 			} else {
-				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
-				response.setMessage("Unable to book");
-				return response;
+				bookingDetails = bookingDao.newBooking(bookingDetails);
+				if (bookingDetails != null) {
+					logger.info("newBooking Successfully completed");
+					response.setHttpStatus(HttpStatus.ACCEPTED);
+					response.setMessage("Booking Confirmed");
+					response.setResponseBody(new JSONObject(bookingDetails));
+					return response;
+				} else {
+					logger.error("Booking Failed");
+					response.setHttpStatus(HttpStatus.NOT_FOUND);
+					response.setMessage("Booking Failed");
+					return response;
+				}
 			}
+		} catch (Exception e) {
+			logger.fatal("Exception Occured : " + e.getLocalizedMessage());
+			response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE);
+			response.setMessage("Exception Occured");
+			return response;
 		}
 	}
 
 	@PostMapping(value = "updateBookingById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response updateBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
-		if (bookingDetails == null) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("");
-			return response;
-		} else if (bookingDetails.getId() == 0) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Enter Booking Number");
-			return response;
-		} else if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
-			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
-			response.setMessage("Please Login");
-			return response;
-		} else {
-			bookingDetails = bookingDao.updateBooking(bookingDetails);
-			if (bookingDetails != null) {
-				response.setHttpStatus(HttpStatus.ACCEPTED.toString());
-				response.setMessage("Booking Successfully");
-				response.setResponseBody(new JSONObject(bookingDetails));
+
+		try {
+			if (bookingDetails == null || bookingDetails.getId() == 0 || bookingDetails.getCustomer() == null
+					|| bookingDetails.getCustomer().getId() == 0) {
+				response.setHttpStatus(HttpStatus.BAD_REQUEST);
+				response.setMessage("Booking Details Validatio Failed");
 				return response;
 			} else {
-				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
-				response.setMessage("Unable to book");
-				return response;
+				boolean status = bookingDao.updateBooking(bookingDetails);
+				if (status == true) {
+					logger.info("Update Booking Details Success");
+					response.setHttpStatus(HttpStatus.ACCEPTED);
+					response.setMessage("Successfully Updated");
+					response.setResponseBody(new JSONObject(bookingDetails));
+					return response;
+				} else {
+					logger.warn("Booking Details updation Failed");
+					response.setHttpStatus(HttpStatus.NOT_FOUND);
+					response.setMessage("Update Booking Failed");
+					return response;
+				}
 			}
+		} catch (Exception e) {
+			logger.fatal("Exception Occured : " + e.getLocalizedMessage());
+			response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE);
+			response.setMessage("Exception Occured");
+			return response;
 		}
 	}
 

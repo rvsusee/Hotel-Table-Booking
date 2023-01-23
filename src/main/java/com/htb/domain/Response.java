@@ -1,33 +1,34 @@
 package com.htb.domain;
 
 import org.json.JSONObject;
+import org.springframework.http.HttpStatus;
 
 public class Response {
 
-	private String httpStatus;
+	private int httpStatus;
 	private String message;
 	private String responseBody;
 
 	public Response() {
 	}
 
-	public Response(String httpStatus, String message) {
+	public Response(int httpStatus, String message) {
 		this.httpStatus = httpStatus;
 		this.message = message;
 	}
 
-	public Response(String httpStatus, String message, String responseBody) {
+	public Response(int httpStatus, String message, String responseBody) {
 		this.httpStatus = httpStatus;
 		this.message = message;
 		this.responseBody = responseBody;
 	}
 
-	public String getHttpStatus() {
+	public int getHttpStatus() {
 		return httpStatus;
 	}
 
-	public void setHttpStatus(String httpStatus) {
-		this.httpStatus = httpStatus;
+	public void setHttpStatus(HttpStatus httpStatus) {
+		this.httpStatus = httpStatus.value();
 	}
 
 	public String getMessage() {

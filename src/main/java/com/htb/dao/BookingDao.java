@@ -7,6 +7,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -22,7 +24,10 @@ public class BookingDao {
 	@Autowired
 	ConnectionPooling connectionPooling;
 
+	Logger logger = LogManager.getLogger("BookingDao");
+
 	public BookingDetails newBooking(BookingDetails bookingDetails) {
+		logger.info("newBookingDao");
 		try {
 			String query = "exec HOTEL_ADD_BOOKING @customer_id = ? , @person_count= ?, @date_time = ?, @table_id= ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
@@ -31,18 +36,24 @@ public class BookingDao {
 			preparedStatement.setTimestamp(3, new Timestamp(bookingDetails.getDateTime().getTime()));
 			preparedStatement.setInt(4, bookingDetails.getAllocatedTable().getId());
 			if (preparedStatement.executeUpdate() > 0) {
-				System.out.println("booking Confirmed");
-				return getLastBookingID(bookingDetails.getCustomer()).get(0);
+				logger.info("Query Executed");
+				logger.info("booking Success");
+				return getLastBookingByCustomerID(bookingDetails.getCustomer()).get(0);
 			} else {
+				logger.info("Booking Failed");
 				return null;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException - newBooking: " + e.getLocalizedMessage());
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return null;
+		} catch (Exception e) {
+			logger.fatal("Exception : " + e.getLocalizedMessage());
 			return null;
 		}
 	}
 
-	public BookingDetails updateBooking(BookingDetails bookingDetails) {
+	public boolean updateBooking(BookingDetails bookingDetails) {
+		logger.info("updateBooking");
 		try {
 			String query = "exec HOTEL_UPDATE_BOOKING @booking_id = ?, @customer_id = ?, @person_count= ?, @date_time = ?, @table_id= ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
@@ -51,41 +62,55 @@ public class BookingDao {
 			preparedStatement.setTimestamp(3, new Timestamp(bookingDetails.getDateTime().getTime()));
 			preparedStatement.setInt(4, bookingDetails.getAllocatedTable().getId());
 			if (preparedStatement.executeUpdate() > 0) {
-				System.out.println("booking Confirmed");
-				return getLastBookingID(bookingDetails.getCustomer()).get(0);
+				logger.info("Query Executed");
+				logger.info("booking updated successfully");
+				return true;
 			} else {
-				return null;
+				logger.info("booking updation failed");
+				return false;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException - newBooking: " + e.getLocalizedMessage());
-			return null;
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return false;
+		} catch (Exception e) {
+			logger.fatal("Exception : " + e.getLocalizedMessage());
+			return false;
 		}
 	}
 
 	public boolean cancelBookingById(BookingDetails bookingDetails) {
+		logger.info("cancelBookingById");
 		try {
 			String query = "DELETE FROM HOTEL_BOOKING_DETAILS where id = ? and customer_id = ? ;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setInt(1, bookingDetails.getId());
 			preparedStatement.setInt(2, bookingDetails.getCustomer().getId());
 			if (preparedStatement.executeUpdate() > 0) {
+				logger.info("Query Executed");
+				logger.info("Booking Cancelled Successfully");
 				return true;
 			} else {
+				logger.info("Booking Cancellation Failed");
 				return false;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException - cancelBookingById : " + e.getLocalizedMessage());
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return false;
+		} catch (Exception e) {
+			logger.fatal("Exception : " + e.getLocalizedMessage());
 			return false;
 		}
 
 	}
 
-	public List<BookingDetails> getLastBookingID(Customer customer) {
+	public List<BookingDetails> getLastBookingByCustomerID(Customer customer) {
+		logger.info("getLastBookingByCustomerID");
 		try {
 			String query = "exec HOTEL_GET_LAST_BK_DETAILS @customer_id = ?";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setInt(1, customer.getId());
 			ResultSet resultSet = preparedStatement.executeQuery();
+			logger.info("Query Executed");
 			List<BookingDetails> bookings = new ArrayList<>();
 			while (resultSet.next()) {
 				BookingDetails bookingDetails = new BookingDetails();
@@ -98,21 +123,24 @@ public class BookingDao {
 						new TableDetails(resultSet.getInt("table_id"), resultSet.getInt("table_size")));
 				bookings.add(bookingDetails);
 			}
+
 			return bookings;
 		} catch (SQLException e) {
-			System.out.println("SQLException - getLastBookingID : " + e.toString());
+			logger.fatal("SQLException - getLastBookingID : " + e.toString());
 			return null;
 		}
 
 	}
 
 	public BookingDetails getBookingById(BookingDetails bookingDetails) {
+		logger.info("getBookingById");
 		try {
 			String query = "exec HOTEL_GET_BOOKING_DETAILS_BY_ID @booking_id = ? ,@customer_id = ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setInt(1, bookingDetails.getId());
 			preparedStatement.setInt(2, bookingDetails.getCustomer().getId());
 			ResultSet resultSet = preparedStatement.executeQuery();
+			logger.info("Query Executed");
 			if (resultSet.next()) {
 				bookingDetails.setId(resultSet.getInt("id"));
 				bookingDetails.setCustomer(bookingDetails.getCustomer());
@@ -126,7 +154,7 @@ public class BookingDao {
 				return null;
 			}
 		} catch (SQLException e) {
-			System.out.println("SQLException - getBookingByID : " + e.getLocalizedMessage());
+			logger.fatal("SQLException - getBookingByID : " + e.getLocalizedMessage());
 			return null;
 		}
 	}
@@ -171,7 +199,7 @@ public class BookingDao {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("Exception: " + e.toString());
+			logger.info("Exception: " + e.toString());
 			return null;
 		}
 	}
@@ -188,7 +216,7 @@ public class BookingDao {
 			}
 			return tableDetails;
 		} catch (Exception e) {
-			System.out.println("Exception: " + e.toString());
+			logger.info("Exception: " + e.toString());
 			return null;
 		}
 	}
