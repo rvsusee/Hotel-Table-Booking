@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,8 +31,8 @@ public class Controller {
 	@GetMapping(value = "customerLogin", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response customerLogin(@RequestBody Customer customerInput) {
+		System.out.println("Customer Login API");
 		Response response = new Response();
-
 		try {
 			if (Long.toString(customerInput.getMobileNumber()).length() != 10) {
 				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
@@ -39,7 +40,7 @@ public class Controller {
 				return response;
 			} else {
 				List<Customer> customerList = customerDao.customerLogin(customerInput);
-				if (customerList == null) {
+				if (customerList != null) {
 					if (customerList.size() == 0) {
 						response.setHttpStatus(HttpStatus.NO_CONTENT.toString());
 						response.setMessage("Customer Not Found");
@@ -83,9 +84,8 @@ public class Controller {
 				response.setMessage("Please Enter 10 digit Mobile number");
 				return response;
 			} else {
-//				check if the customer is exist or not
 				List<Customer> customerList = customerDao.customerLogin(customerInput);
-				if (customerList == null) {
+				if (customerList != null) {
 					if (customerList.size() == 0) {
 						boolean customer = customerDao.addNewCustomer(customerInput);
 						if (customer == false) {
@@ -124,55 +124,116 @@ public class Controller {
 //		}
 //
 
-//		get last booking details
-	@GetMapping(value = "getLastBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response getLastBooking(@RequestBody Customer customer) throws Exception {
+//	get booking by Id
+	@GetMapping(value = "getBkDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Response getBookingDetailsByID(@RequestBody BookingDetails bookingDetails) throws Exception {
 		Response response = new Response();
-
-		if (customer == null || customer.getId() == 0) {
+		if (bookingDetails == null || bookingDetails.getId() == 0) {
+			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+			response.setMessage("Please Enter Booking Details");
+			return response;
+		} else if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
 			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
 			response.setMessage("Please Login");
 			return response;
 		} else {
-			List<BookingDetails> bookingDetails = bookingDao.getLastBookingID(customer, 1);
-			if (bookingDetails == null) {
-				if (bookingDetails.size() > 0) {
-					response.setHttpStatus(HttpStatus.FOUND.toString());
-					response.setMessage("Last Booking Details Found");
-					response.setResponseBody(new JSONObject(bookingDetails));
-					return response;
-
-				} else {
-					response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
-					response.setMessage("Booking Details Not Found");
-					return response;
-				}
+			bookingDetails = bookingDao.getBookingById(bookingDetails);
+			if (bookingDetails != null) {
+				response.setHttpStatus(HttpStatus.FOUND.toString());
+				response.setMessage("Booking Details Found");
+				response.setResponseBody(new JSONObject(bookingDetails));
+				return response;
 			} else {
-				response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE.toString());
-				response.setMessage("Something Wrong");
+				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
+				response.setMessage("Booking Details Not Found");
 				return response;
 			}
 		}
-
 	}
 
-//		Cancel booking by Id
-	@GetMapping(value = "cancelBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-	public Response deleteBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+//	get last booking by customer details
+	@GetMapping(value = "getLastBk", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Response getLastBooking(@RequestBody Customer customer) throws Exception {
+		System.out.println("Get Last Booking Details API");
 		Response response = new Response();
 
-		if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
+		if (customer == null || customer.getId() == 0) {
+			System.out.println("Custmer Details not Found");
 			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
 			response.setMessage("Please Login");
 			return response;
 		} else {
-			if (bookingDao.cancelBookingById(bookingDetails)) {
-				response.setHttpStatus(HttpStatus.ACCEPTED.toString());
-				response.setMessage("Booking Cancel Successfully");
+			List<BookingDetails> bookingDetails = bookingDao.getLastBookingID(customer);
+			if (bookingDetails == null) {
+				response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+				response.setMessage("Booking Details Not Found");
+				return response;
+			} else if (bookingDetails.size() > 0) {
+				response.setHttpStatus(HttpStatus.FOUND.toString());
+				response.setMessage("Last Booking Details Found");
+				response.setResponseBody(new JSONObject(bookingDetails));
 				return response;
 			} else {
-				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
-				response.setMessage("Unable to Cancel Booking");
+				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
+				response.setMessage("Booking Details Not Found");
+				return response;
+			}
+		}
+	}
+
+//		Cancel booking by Id
+	@DeleteMapping(value = "cancelBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Response deleteBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+		Response response = new Response();
+		if (bookingDetails == null) {
+			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+			response.setMessage("Please Enter Booking Details");
+			return response;
+		} else {
+			if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
+				response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+				response.setMessage("Please Login");
+				return response;
+			} else {
+				if (bookingDao.cancelBookingById(bookingDetails)) {
+					response.setHttpStatus(HttpStatus.ACCEPTED.toString());
+					response.setMessage("Booking Cancel Successfully");
+					return response;
+				} else {
+					response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE.toString());
+					response.setMessage("Unable to Cancel Booking");
+					return response;
+				}
+			}
+		}
+	}
+
+//	get booking by Id
+	@GetMapping(value = "newBooking", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public Response newBooking(@RequestBody BookingDetails bookingDetails) throws Exception {
+		Response response = new Response();
+		if (bookingDetails == null) {
+			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+			response.setMessage("Please Enter Booking Details");
+			return response;
+		} else if (bookingDetails.getCustomer() == null || bookingDetails.getCustomer().getId() == 0) {
+			response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+			response.setMessage("Please Login");
+			return response;
+		} else {
+			bookingDetails = bookingDao.newBooking(bookingDetails);
+			if (bookingDetails != null) {
+				response.setHttpStatus(HttpStatus.FOUND.toString());
+				response.setMessage("Booking Successfully");
+				response.setResponseBody(new JSONObject(bookingDetails));
+				return response;
+			} else if (bookingDetails == null) {
+				response.setHttpStatus(HttpStatus.NOT_FOUND.toString());
+				response.setMessage("Unable to book");
+				return response;
+			} else {
+				response.setHttpStatus(HttpStatus.BAD_REQUEST.toString());
+				response.setMessage("Something Wrong");
 				return response;
 			}
 		}

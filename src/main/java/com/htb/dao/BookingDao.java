@@ -1,12 +1,9 @@
 package com.htb.dao;
 
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +23,7 @@ public class BookingDao {
 	ConnectionPooling connectionPooling;
 
 //	add booking details In progress
-	public boolean addBooking(BookingDetails bookingDetails) {
+	public BookingDetails newBooking(BookingDetails bookingDetails) {
 		try {
 			String query = "exec HOTEL_ADD_BOOKING @customer_id = ? , @person_count= ?, @date_time = ?, @table_id= ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
@@ -34,24 +31,18 @@ public class BookingDao {
 			preparedStatement.setInt(2, bookingDetails.getPersonCount());
 			preparedStatement.setTimestamp(3, new Timestamp(bookingDetails.getDateTime().getTime()));
 			preparedStatement.setInt(4, bookingDetails.getAllocatedTable().getTableId());
-
 			if (preparedStatement.executeUpdate() > 0) {
-				return true;
+				System.out.println("booking Confirmed");
+				return getLastBookingID(bookingDetails.getCustomer()).get(0);
 			} else {
-				return false;
+				return null;
 			}
-		} catch (Exception e) {
-			System.out.println(e.getLocalizedMessage());
-			return false;
+		} catch (SQLException e) {
+			System.out.println("newBooking Exception : "+e.getLocalizedMessage());
+			return null;
 		}
 	}
 
-	public TableDetails checkAvailabilityTable(java.util.Date bookingDateTime) {
-
-		
-		
-		return null;
-	}
 
 //	public java.sql.Timestamp convertSqlDate(String strDate) {
 //		SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -86,15 +77,14 @@ public class BookingDao {
 	}
 
 //	get last booking Details using customer id
-	public List<BookingDetails> getLastBookingID(Customer customer, int lastNoOfTransaction) {
+	public List<BookingDetails> getLastBookingID(Customer customer) {
 		try {
 //			use join query and stored procedure
-			String query = "SELECT TOP ? * FROM HOTEL_BOOKING_DETAILS where customer_id = ? ORDER BY id DESC;";
+			String query = "exec HOTEL_GET_LAST_BK_DETAILS @customer_id = ?";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
-			preparedStatement.setInt(1, lastNoOfTransaction);
-			preparedStatement.setInt(2, customer.getId());
+			preparedStatement.setInt(1, customer.getId());
 			ResultSet resultSet = preparedStatement.executeQuery();
-			List<BookingDetails> bookings = null;
+			List<BookingDetails> bookings = new ArrayList<>();
 			while (resultSet.next()) {
 				BookingDetails bookingDetails = new BookingDetails();
 				bookingDetails.setId(resultSet.getInt("id"));
@@ -107,8 +97,8 @@ public class BookingDao {
 				bookings.add(bookingDetails);
 			}
 			return bookings;
-		} catch (Exception e) {
-			System.out.println("Exception : " + e.getLocalizedMessage());
+		} catch (SQLException e) {
+			System.out.println("getLastBookingID-DAO : " + e.toString());
 			return null;
 		}
 
@@ -118,7 +108,7 @@ public class BookingDao {
 	public BookingDetails getBookingById(BookingDetails bookingDetails) {
 		try {
 //			use join query and stored procedure
-			String query = "SELECT  * FROM HOTEL_BOOKING_DETAILS where id = ? and customer_id = ?;";
+			String query = "exec HOTEL_GET_BOOKING_DETAILS_BY_ID @booking_id = ? ,@customer_id = ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setInt(1, bookingDetails.getId());
 			preparedStatement.setInt(2, bookingDetails.getCustomer().getId());
@@ -148,6 +138,20 @@ public class BookingDao {
 //	
 //	
 //	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//	
+//		
 //	
 //	get Branch Details using Brach Id
 	public BranchDetails getBranchDetailsById(int branch_id) {

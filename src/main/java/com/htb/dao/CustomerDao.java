@@ -19,7 +19,7 @@ public class CustomerDao {
 	ConnectionPooling connectionPooling;
 
 	public List<Customer> customerLogin(Customer customer) {
-		String query = "SELECT * FROM HOTEL_CUSTOMER WHERE mobile_number = ? ;";
+		String query = "exec HOTEL_GET_CUSTOMER_BY_MOBILENUMBER @mobile_number = ?;";
 		try {
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setLong(1, customer.getMobileNumber());
@@ -38,7 +38,7 @@ public class CustomerDao {
 
 	public boolean addNewCustomer(Customer customer) {
 		try {
-			String query = "INSERT INTO HOTEL_CUSTOMER(mobile_number,pin_number) VALUES (?,?)";
+			String query = "exec HOTEL_ADD_NEW_CUSTOMER @mobile_number = ? @pin_number = ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setLong(1, customer.getMobileNumber());
 			preparedStatement.setString(2, customer.getPin());
