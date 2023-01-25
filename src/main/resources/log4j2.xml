@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="WARN">
 	<Properties>
-		<Property name="log-path">D:\STS Workspace\Log\Hotel-Table-Booking
+		<Property name="log-path">D:\STS Workspace\Log\Hotel-Table-Booking/
 		</Property>
 	</Properties>
 	<Appenders>
@@ -24,12 +24,12 @@
 			<Policies>
 				<TimeBasedTriggeringPolicy interval="1"
 					modulate="true" />
-				<!-- <SizeBasedTriggeringPolicy size="1 KB" /> -->
+				<!-- <SizeBasedTriggeringPolicy size="10 MB" /> -->
 			</Policies>
 			<DefaultRolloverStrategy max="500" />
 		</RollingFile>
 
-		<RollingFile name="Hotel-Table-Booking"
+		<RollingFile name="report"
 			fileName="${log-path}/trace.log"
 			filePattern="${log-path}/trace-%d{yyyy-MM-dd-HH}.log">
 			<!-- log pattern -->
@@ -46,9 +46,9 @@
 			<DefaultRolloverStrategy max="500" />
 		</RollingFile>
 		<!-- file appender -->
-		<RollingFile name="Hotel-Table-Booking"
-			fileName="${log-path}/Hotel-Table-Booking.log"
-			filePattern="${log-path}/Hotel-Table-Booking-%d{yyyy-MM-dd-HH}.log">
+		<RollingFile name="HotelTableBooking"
+			fileName="${log-path}/HotelTableBooking.log"
+			filePattern="${log-path}/HotelTableBooking-%d{yyyy-MM-dd-HH}.log">
 			<!-- log pattern -->
 			<PatternLayout>
 				<pattern>%d{dd/MM/yyyy HH:mm:ss:SSS} %5p - %m%n</pattern>
@@ -69,18 +69,17 @@
 		<Logger name="Dialog.Designer.TraceWriter" level="debug"
 			additivity="false">
 			<appender-ref ref="trace" />
-			>
 
 			<!-- <appender-ref ref="console-log"/> -->
 		</Logger>
-		<Logger name="Hotel-Table-Booking" level="debug"
+		<Logger name="HotelTableBooking" level="debug"
 			additivity="false">
-			<appender-ref ref="Hotel-Table-Booking" />
+			<appender-ref ref="HotelTableBooking" />
 			<appender-ref ref="console-log" />
 		</Logger>
 		<Logger name="Dialog.Designer.ReportWriter" level="debug"
 			additivity="false">
-			<appender-ref ref="Hotel-Table-Booking" />
+			<appender-ref ref="report" />
 			<!-- <appender-ref ref="console-log"/> -->
 		</Logger>
 		<Root level="debug" additivity="false">

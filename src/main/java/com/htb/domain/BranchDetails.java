@@ -3,10 +3,14 @@ package com.htb.domain;
 import java.util.List;
 
 public class BranchDetails {
+
 	private int id;
+
 	private String name;
+
 	private String address;
-	List<TableDetails> tablesList;
+
+    List<TableDetails> tablesList;
 
 	public BranchDetails(int id, String name, String address, List<TableDetails> tablesList) {
 		this.id = id;

@@ -24,7 +24,7 @@ public class BookingDao {
 	@Autowired
 	ConnectionPooling connectionPooling;
 
-	Logger logger = LogManager.getLogger("BookingDao");
+	Logger logger = LogManager.getLogger("HotelTableBooking");
 
 	public BookingDetails newBooking(BookingDetails bookingDetails) {
 		logger.info("newBookingDao");

@@ -28,12 +28,11 @@ public class BookingController {
 	@Autowired
 	BookingDao bookingDao;
 
-	Logger logger = LogManager.getLogger("Booking Controller");
+	Logger logger = LogManager.getLogger("HotelTableBooking");
 
 //	get booking by Id
 	@GetMapping(value = "/getBookingDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response getBookingDetailsById(@RequestBody BookingDetails bookingDetails) throws Exception {
-		logger.info("getBookingDetailsByID API");
 
 		Response response = new Response();
 		try {

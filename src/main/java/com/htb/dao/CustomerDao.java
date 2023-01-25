@@ -2,7 +2,6 @@ package com.htb.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,24 +19,23 @@ public class CustomerDao {
 	@Autowired
 	ConnectionPooling connectionPooling;
 
-	Logger logger = LogManager.getLogger("Customer Dao");
+	Logger logger = LogManager.getLogger("HotelTableBooking");
 
-	public List<Customer> customerLogin(Customer customer) {
+	public Customer customerLogin(Customer customer) {
 		logger.info("customerLogin");
 		String query = "exec HOTEL_GET_CUSTOMER_BY_MOBILENUMBER @mobile_number = ?;";
 		try {
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setLong(1, customer.getMobileNumber());
 			ResultSet rs = preparedStatement.executeQuery();
-			List<Customer> customerList = new ArrayList<>();
+			Customer customerDB = null;
 			while (rs.next()) {
-				customerList.add(new Customer(rs.getInt("id"), rs.getString("name"), rs.getLong("mobile_number"),
-						rs.getString("pin_number"), rs.getString("email_id")));
+				customerDB = new Customer(rs.getInt("id"), rs.getString("name"), rs.getLong("mobile_number"),
+						rs.getString("pin_number"), rs.getString("email_id"));
 			}
-			logger.info("data retrieved Successfully");
-			return customerList;
-		} catch (SQLException e) {
-			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return customerDB;
+		} catch (Exception e) {
+			logger.fatal("Exception : " + e.getLocalizedMessage());
 			return null;
 		}
 	}
@@ -56,8 +54,8 @@ public class CustomerDao {
 				logger.error("data insertion failed");
 				return false;
 			}
-		} catch (SQLException e) {
-			logger.info("SQLException" + e.getLocalizedMessage());
+		} catch (Exception e) {
+			logger.info("Exception" + e.getLocalizedMessage());
 			return false;
 		}
 	}

@@ -1,11 +1,24 @@
 package com.htb.domain;
 
 public class Customer {
+
 	private int id;
+
 	private String name;
+
 	private long mobileNumber;
+
 	private String pin;
+
 	private String emailId;
+
+	public Customer() {
+	}
+
+	public Customer(long mobileNumber, String pin) {
+		this.mobileNumber = mobileNumber;
+		this.pin = pin;
+	}
 
 	public Customer(int id, String name, long mobileNumber, String pin, String emailId) {
 		this.id = id;
@@ -60,6 +73,5 @@ public class Customer {
 		return "Customer [id=" + id + ", name=" + name + ", mobileNumber=" + mobileNumber + ", pin=" + pin
 				+ ", emailId=" + emailId + "]";
 	}
-	
-	
+
 }

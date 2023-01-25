@@ -1,8 +1,11 @@
 package com.htb.domain;
 
 public class Bill {
+
 	private int id;
+
 	private BookingDetails bookingDetails;
+
 	private double amount;
 
 	public Bill(int id, BookingDetails bookingDetails, double amount) {

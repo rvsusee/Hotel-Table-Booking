@@ -1,7 +1,5 @@
 package com.htb.controller;
 
-import java.util.List;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
@@ -30,12 +28,25 @@ public class CustomerController {
 	@Autowired
 	BookingDao bookingDao;
 
-	Logger logger = LogManager.getLogger("Customer Controller");
+	Logger logger = LogManager.getLogger("HotelTableBooking");
+
+	@GetMapping("/t1")
+	public String response() {
+		return "Testing";
+	}
 
 	@GetMapping(value = "/login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
 			MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response customerLogin(@RequestBody Customer customerInput) {
 		Response response = new Response();
+
+		try {
+			Logger logger1 = LogManager.getLogger("HotelTableBooking");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		logger.info("getBookingDetailsByID API");
+
 		logger.info("login API");
 		try {
 			if (Long.toString(customerInput.getMobileNumber()).length() != 10) {
@@ -45,33 +56,25 @@ public class CustomerController {
 				return response;
 			} else {
 				logger.info("Mobile Number Validation - Success");
-				List<Customer> customerList = customerDao.customerLogin(customerInput);
-				if (customerList != null) {
-					if (customerList.size() == 0) {
-						logger.info("Customer Details Not Found in database");
-						response.setHttpStatus(HttpStatus.NO_CONTENT);
-						response.setMessage("Customer Not Found");
+				Customer customerDB = customerDao.customerLogin(customerInput);
+				if (customerDB != null) {
+					logger.info("Customer Details Found in Database");
+					if (customerDB.getPin().equals(customerInput.getPin())) {
+						logger.info("Customer Login Success");
+						response.setHttpStatus(HttpStatus.ACCEPTED);
+						response.setResponseBody(new JSONObject(customerDB));
+						response.setMessage("Login Success");
 						return response;
 					} else {
-						logger.info("Customer Details Found in Database");
-						for (int customer = 0; customer < customerList.size(); customer++) {
-							if (customerList.get(customer).getPin().equals(customerInput.getPin())) {
-								logger.info("Customer Login Success");
-								response.setHttpStatus(HttpStatus.ACCEPTED);
-								response.setResponseBody(new JSONObject(customerList.get(customer)));
-								response.setMessage("Login Success");
-								return response;
-							}
-						}
 						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
 						logger.warn("Pin Number Wrong");
 						response.setMessage("Pin Number Wrong");
 						return response;
 					}
 				} else {
-					response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE);
-					logger.error("Database Connection Failed");
-					response.setMessage("Database Connection Failed");
+					logger.info("Customer Details Not Found in database");
+					response.setHttpStatus(HttpStatus.NO_CONTENT);
+					response.setMessage("Customer Not Found");
 					return response;
 				}
 			}
@@ -101,32 +104,25 @@ public class CustomerController {
 				return response;
 			} else {
 				logger.info("Mobile Number Validation Success");
-				List<Customer> customerList = customerDao.customerLogin(customerInput);
-				if (customerList != null) {
-					if (customerList.size() == 0) {
-						logger.info("Customer details is Not Exist");
-						boolean customer = customerDao.addNewCustomer(customerInput);
-						if (customer == false) {
-							logger.warn("Unable to create customer");
-							response.setHttpStatus(HttpStatus.BAD_REQUEST);
-							response.setMessage("Account Creation Failed");
-							return response;
-						} else {
-							logger.info("Account Created Success");
-							response.setHttpStatus(HttpStatus.ACCEPTED);
-							response.setMessage("Account Created Success");
-							return response;
-						}
+				Customer customerDB = customerDao.customerLogin(customerInput);
+				if (customerDB == null) {
+					logger.info("New Customer");
+					boolean customer = customerDao.addNewCustomer(customerInput);
+					if (customer == false) {
+						logger.warn("Unable to create customer");
+						response.setHttpStatus(HttpStatus.BAD_REQUEST);
+						response.setMessage("Account Creation Failed");
+						return response;
 					} else {
-						logger.error("Existing Customer");
-						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-						response.setMessage("Existing Customer");
+						logger.info("Account Created Success");
+						response.setHttpStatus(HttpStatus.ACCEPTED);
+						response.setMessage("Account Created Success");
 						return response;
 					}
 				} else {
-					logger.fatal("Database Connection Error");
-					response.setHttpStatus(HttpStatus.SERVICE_UNAVAILABLE);
-					response.setMessage("Database Connection Error");
+					logger.error("Existing Customer or Database Error");
+					response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
+					response.setMessage("Account Creation Failed");
 					return response;
 				}
 			}
