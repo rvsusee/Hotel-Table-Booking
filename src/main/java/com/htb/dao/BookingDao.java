@@ -123,10 +123,12 @@ public class BookingDao {
 						new TableDetails(resultSet.getInt("table_id"), resultSet.getInt("table_size")));
 				bookings.add(bookingDetails);
 			}
-
 			return bookings;
 		} catch (SQLException e) {
-			logger.fatal("SQLException - getLastBookingID : " + e.toString());
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return null;
+		} catch (Exception e) {
+			logger.fatal("Exception : " + e.getLocalizedMessage());
 			return null;
 		}
 
@@ -154,7 +156,10 @@ public class BookingDao {
 				return null;
 			}
 		} catch (SQLException e) {
-			logger.fatal("SQLException - getBookingByID : " + e.getLocalizedMessage());
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return null;
+		} catch (Exception e) {
+			logger.fatal("Exception : " + e.getLocalizedMessage());
 			return null;
 		}
 	}
@@ -165,7 +170,7 @@ public class BookingDao {
 //	
 //	
 //	
-//	
+//	unused methods 
 //	
 //	
 //	
@@ -220,5 +225,4 @@ public class BookingDao {
 			return null;
 		}
 	}
-
 }

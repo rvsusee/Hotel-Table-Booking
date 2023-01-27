@@ -52,7 +52,7 @@ public class CustomerController {
 			if (Long.toString(customerInput.getMobileNumber()).length() != 10) {
 				logger.warn("Mobile Number Validation - Failed");
 				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-				response.setMessage("Mobile Number Validation Failed");
+				response.setMessage("Mobile Number Validation - Failed");
 				return response;
 			} else {
 				logger.info("Mobile Number Validation - Success");
@@ -63,18 +63,19 @@ public class CustomerController {
 						logger.info("Customer Login Success");
 						response.setHttpStatus(HttpStatus.ACCEPTED);
 						response.setResponseBody(new JSONObject(customerDB));
-						response.setMessage("Login Success");
+						response.setMessage("Login - Success");
 						return response;
 					} else {
 						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
+						logger.warn("Login - Failed");
 						logger.warn("Pin Number Wrong");
-						response.setMessage("Pin Number Wrong");
+						response.setMessage("Login Failed - Pin Number Wrong");
 						return response;
 					}
 				} else {
 					logger.info("Customer Details Not Found in database");
 					response.setHttpStatus(HttpStatus.NO_CONTENT);
-					response.setMessage("Customer Not Found");
+					response.setMessage("Login Failed - Customer Not Found");
 					return response;
 				}
 			}
@@ -98,12 +99,12 @@ public class CustomerController {
 		Response response = new Response();
 		try {
 			if (Long.toString(customerInput.getMobileNumber()).length() != 10) {
-				logger.warn("Mobile Number Validation Failed");
+				logger.warn("Mobile Number Validation - Failed");
 				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-				response.setMessage("Mobile Number Validation Failed");
+				response.setMessage("Mobile Number Validation - Failed");
 				return response;
 			} else {
-				logger.info("Mobile Number Validation Success");
+				logger.info("Mobile Number Validation - Success");
 				Customer customerDB = customerDao.customerLogin(customerInput);
 				if (customerDB == null) {
 					logger.info("New Customer");
@@ -111,12 +112,12 @@ public class CustomerController {
 					if (customer == false) {
 						logger.warn("Unable to create customer");
 						response.setHttpStatus(HttpStatus.BAD_REQUEST);
-						response.setMessage("Account Creation Failed");
+						response.setMessage("Account Creation - Failed");
 						return response;
 					} else {
 						logger.info("Account Created Success");
 						response.setHttpStatus(HttpStatus.ACCEPTED);
-						response.setMessage("Account Created Success");
+						response.setMessage("Account Creation - Success");
 						return response;
 					}
 				} else {

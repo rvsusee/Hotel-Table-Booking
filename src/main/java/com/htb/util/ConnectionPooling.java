@@ -4,11 +4,15 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class ConnectionPooling {
+
+	Logger logger = LogManager.getLogger("HotelTableBooking");
 
 	private static BasicDataSource dataSource = null;
 
@@ -23,8 +27,11 @@ public class ConnectionPooling {
 
 	private BasicDataSource getDataSource() {
 		if (dataSource != null) {
+			logger.info("Datasource is Already Established");
 			return dataSource;
 		} else {
+			logger.info("Datasource is Not Established");
+			logger.info("New Datasource is Creating...");
 			dataSource = new BasicDataSource();
 			dataSource.setUrl(URL);
 			dataSource.setUsername(USERNAME);
@@ -33,6 +40,7 @@ public class ConnectionPooling {
 			dataSource.setMinIdle(5);
 			dataSource.setMaxIdle(10);
 			dataSource.setMaxTotal(25);
+			logger.info("Datasource created Successfully");
 			return dataSource;
 		}
 	}
@@ -41,11 +49,16 @@ public class ConnectionPooling {
 		BasicDataSource basicDataSource;
 		try {
 			basicDataSource = getDataSource();
+			logger.info("Datasoruce Access - Success");
 			Connection conn = basicDataSource.getConnection();
+			logger.info("Connection Object Access - Success");
 			return conn;
 		} catch (SQLException e) {
-			System.out.println("Exception Occured : " + e.getMessage());
+			logger.fatal("Database Error : " + e.getLocalizedMessage());
 			return null;
+		} catch (Exception e) {
+			logger.fatal("Exception Occured : " + e.getLocalizedMessage());
+			return null;			
 		}
 	}
 }

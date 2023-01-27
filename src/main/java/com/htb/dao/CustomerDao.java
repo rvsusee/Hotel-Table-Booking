@@ -2,6 +2,7 @@ package com.htb.dao;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,6 +35,9 @@ public class CustomerDao {
 						rs.getString("pin_number"), rs.getString("email_id"));
 			}
 			return customerDB;
+		} catch (SQLException e) {
+			logger.fatal("SQLException : " + e.getLocalizedMessage());
+			return null;
 		} catch (Exception e) {
 			logger.fatal("Exception : " + e.getLocalizedMessage());
 			return null;
@@ -54,8 +58,11 @@ public class CustomerDao {
 				logger.error("data insertion failed");
 				return false;
 			}
+		} catch (SQLException e) {
+			logger.fatal("SQLException" + e.getLocalizedMessage());
+			return false;
 		} catch (Exception e) {
-			logger.info("Exception" + e.getLocalizedMessage());
+			logger.fatal("Exception" + e.getLocalizedMessage());
 			return false;
 		}
 	}
