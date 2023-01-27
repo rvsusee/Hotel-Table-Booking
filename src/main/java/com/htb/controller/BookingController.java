@@ -33,22 +33,6 @@ public class BookingController {
 	@GetMapping(value = "/getBookingDetailsById", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public @ResponseBody Response getBookingDetailsById(@RequestBody BookingDetails bookingDetails) throws Exception {
 
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
-		
 		Response response = new Response();
 		try {
 			if (bookingDetails == null || bookingDetails.getId() == 0) {
