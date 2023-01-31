@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,43 +36,41 @@ public class CustomerController {
 		return "Testing";
 	}
 
-	@GetMapping(value = "/login", consumes = { MediaType.APPLICATION_JSON_VALUE }, produces = {
-			MediaType.APPLICATION_JSON_VALUE })
-	public @ResponseBody Response customerLogin(@RequestBody Customer customerInput) {
+	@GetMapping(value = "/getExistCustomer/{mobileNumberInput}", produces = { MediaType.APPLICATION_JSON_VALUE })
+	public @ResponseBody Response customerLogin(@PathVariable String mobileNumberInput) {
 		Response response = new Response();
 
+		logger.info("getExistCustomer API");
 		try {
-			Logger logger1 = LogManager.getLogger("HotelTableBooking");
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		logger.info("getBookingDetailsByID API");
-
-		logger.info("login API");
-		try {
-			if (Long.toString(customerInput.getMobileNumber()).length() != 10) {
+			if (mobileNumberInput.length() != 10) {
 				logger.warn("Mobile Number Validation - Failed");
 				response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
 				response.setMessage("Mobile Number Validation - Failed");
 				return response;
 			} else {
 				logger.info("Mobile Number Validation - Success");
-				Customer customerDB = customerDao.customerLogin(customerInput);
+				long mobileNumber = Long.parseLong(mobileNumberInput);
+				Customer customerDB = customerDao.customerLogin(mobileNumber);
 				if (customerDB != null) {
 					logger.info("Customer Details Found in Database");
-					if (customerDB.getPin().equals(customerInput.getPin())) {
-						logger.info("Customer Login Success");
-						response.setHttpStatus(HttpStatus.ACCEPTED);
-						response.setResponseBody(new JSONObject(customerDB));
-						response.setMessage("Login - Success");
-						return response;
-					} else {
-						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-						logger.warn("Login - Failed");
-						logger.warn("Pin Number Wrong");
-						response.setMessage("Login Failed - Pin Number Wrong");
-						return response;
-					}
+					response.setHttpStatus(HttpStatus.ACCEPTED);
+					response.setResponseBody(new JSONObject(customerDB));
+					response.setMessage("Login - Success");
+					return response;
+
+//					if (customerDB.getPin().equals(customerInput.getPin())) {
+//						logger.info("Customer Login Success");
+//						response.setHttpStatus(HttpStatus.ACCEPTED);
+//						response.setResponseBody(new JSONObject(customerDB));
+//						response.setMessage("Login - Success");
+//						return response;
+//					} else {
+//						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
+//						logger.warn("Login - Failed");
+//						logger.warn("Pin Number Wrong");
+//						response.setMessage("Login Failed - Pin Number Wrong");
+//						return response;
+//					}
 				} else {
 					logger.info("Customer Details Not Found in database");
 					response.setHttpStatus(HttpStatus.NO_CONTENT);
@@ -105,7 +104,7 @@ public class CustomerController {
 				return response;
 			} else {
 				logger.info("Mobile Number Validation - Success");
-				Customer customerDB = customerDao.customerLogin(customerInput);
+				Customer customerDB = customerDao.customerLogin(customerInput.getMobileNumber());
 				if (customerDB == null) {
 					logger.info("New Customer");
 					boolean customer = customerDao.addNewCustomer(customerInput);

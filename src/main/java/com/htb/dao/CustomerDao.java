@@ -22,12 +22,12 @@ public class CustomerDao {
 
 	Logger logger = LogManager.getLogger("HotelTableBooking");
 
-	public Customer customerLogin(Customer customer) {
+	public Customer customerLogin(long mobileNumber) {
 		logger.info("customerLogin");
 		String query = "exec HOTEL_GET_CUSTOMER_BY_MOBILENUMBER @mobile_number = ?;";
 		try {
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
-			preparedStatement.setLong(1, customer.getMobileNumber());
+			preparedStatement.setLong(1, mobileNumber);
 			ResultSet rs = preparedStatement.executeQuery();
 			Customer customerDB = null;
 			while (rs.next()) {
