@@ -6,15 +6,10 @@ import java.util.Date;
 public class BookingDetails {
 
 	private int id;
-
 	private Customer customer;
-
 	private int personCount;
-
 	private Date dateTime;
-
 	private TableDetails allocatedTable;
-
 	private Date bookingOn;
 
 	public BookingDetails(int id, Customer customer, int personCount, Date dateTime, TableDetails allocatedTable,

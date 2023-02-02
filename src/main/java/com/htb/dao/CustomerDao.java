@@ -3,8 +3,6 @@ package com.htb.dao;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,7 +45,7 @@ public class CustomerDao {
 	public boolean addNewCustomer(Customer customer) {
 		logger.info("addNewCustomer");
 		try {
-			String query = "exec HOTEL_ADD_NEW_CUSTOMER @mobile_number = ? @pin_number = ?;";
+			String query = "exec HOTEL_ADD_NEW_CUSTOMER @mobile_number = ?, @pin_number = ?;";
 			PreparedStatement preparedStatement = connectionPooling.getConnection().prepareStatement(query);
 			preparedStatement.setLong(1, customer.getMobileNumber());
 			preparedStatement.setString(2, customer.getPin());

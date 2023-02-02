@@ -57,20 +57,6 @@ public class CustomerController {
 					response.setResponseBody(new JSONObject(customerDB));
 					response.setMessage("Login - Success");
 					return response;
-
-//					if (customerDB.getPin().equals(customerInput.getPin())) {
-//						logger.info("Customer Login Success");
-//						response.setHttpStatus(HttpStatus.ACCEPTED);
-//						response.setResponseBody(new JSONObject(customerDB));
-//						response.setMessage("Login - Success");
-//						return response;
-//					} else {
-//						response.setHttpStatus(HttpStatus.NOT_ACCEPTABLE);
-//						logger.warn("Login - Failed");
-//						logger.warn("Pin Number Wrong");
-//						response.setMessage("Login Failed - Pin Number Wrong");
-//						return response;
-//					}
 				} else {
 					logger.info("Customer Details Not Found in database");
 					response.setHttpStatus(HttpStatus.NO_CONTENT);
