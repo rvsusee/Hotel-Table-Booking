@@ -31,11 +31,6 @@ public class CustomerController {
 
 	Logger logger = LogManager.getLogger("HotelTableBooking");
 
-	@GetMapping("/t1")
-	public String response() {
-		return "Testing";
-	}
-
 	@GetMapping(value = "/getExistCustomer/{mobileNumberInput}", produces = { MediaType.APPLICATION_JSON_VALUE })
 	public @ResponseBody Response customerLogin(@PathVariable String mobileNumberInput) {
 		Response response = new Response();
