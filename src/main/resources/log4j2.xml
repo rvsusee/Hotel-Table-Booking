@@ -83,7 +83,7 @@
 			<!-- <appender-ref ref="console-log"/> -->
 		</Logger>
 		<Root level="debug" additivity="false">
-			<!-- <AppenderRef ref="console-log"/> -->
+			<!-- <AppenderRef ref="console-log" /> -->
 		</Root>
 	</Loggers>
 </Configuration>
