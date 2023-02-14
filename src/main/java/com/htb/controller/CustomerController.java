@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fcg.domain.Response;
 import com.htb.dao.BookingDao;
 import com.htb.dao.CustomerDao;
 import com.htb.domain.Customer;
-import com.htb.domain.Response;
 
 @RestController
 @RequestMapping("/customer")

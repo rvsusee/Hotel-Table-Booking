@@ -73,6 +73,11 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 
+				<dependency>
+					<groupId>com.fcg</groupId>
+					<artifactId>FCG</artifactId>
+					<version>0.0.1-SNAPSHOT</version>
+				</dependency>
 	</dependencies>
 	<build>
 		<plugins>
