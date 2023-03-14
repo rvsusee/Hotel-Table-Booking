@@ -68,16 +68,15 @@
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
 		</dependency>
-				<dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-
-				<dependency>
-					<groupId>com.fcg</groupId>
-					<artifactId>FCG</artifactId>
-					<version>0.0.1-SNAPSHOT</version>
-				</dependency>
+		<dependency>
+			<groupId>com.fcg</groupId>
+			<artifactId>FCG</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 	<build>
 		<plugins>
